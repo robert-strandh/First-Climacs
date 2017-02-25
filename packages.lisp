@@ -1,5 +1,5 @@
 ;;;  (c) copyright 2004-2005 by
-;;;           Robert Strandh (strandh@labri.fr)
+;;;           Robert Strandh (robert.strandh@gmail.com)
 ;;;  (c) copyright 2005 by
 ;;;           Matthieu Villeneuve (matthieu.villeneuve@free.fr)
 ;;;  (c) copyright 2006 by

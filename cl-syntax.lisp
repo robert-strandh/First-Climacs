@@ -1,5 +1,5 @@
 ;;;  (c) copyright 2005 by
-;;;           Robert Strandh (strandh@labri.fr)
+;;;           Robert Strandh (robert.strandh@gmail.com)
 ;;;           Nada Ayad (nada.ayad@etu.u-bordeaux1.fr)
 ;;;           Julien Cazaban (bizounorc@hotmail.com)
 ;;;           Pascal Fong Kye (pfongkye@yahoo.com)

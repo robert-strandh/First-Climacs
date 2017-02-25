@@ -1,6 +1,6 @@
 ;;;  (c) copyright 2005 by
 ;;;           Christophe Rhodes (c.rhodes@gold.ac.uk)
-;;;           Robert Strandh (strandh@labri.fr)
+;;;           Robert Strandh (robert.strandh@gmail.com)
 
 ;;; This library is free software; you can redistribute it and/or
 ;;; modify it under the terms of the GNU Library General Public

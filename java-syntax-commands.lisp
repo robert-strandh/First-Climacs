@@ -1,5 +1,5 @@
 ;;;  (c) copyright 2004-2005 by
-;;;           Robert Strandh (strandh@labri.fr)
+;;;           Robert Strandh (robert.strandh@gmail.com)
 ;;;  (c) copyright 2004-2005 by
 ;;;           Elliott Johnson (ejohnson@fasl.info)
 ;;;  (c) copyright 2005 by
