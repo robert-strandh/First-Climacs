@@ -20,10 +20,7 @@
 
 ;;; ASDF system definition for Climacs.
 
-(defpackage :climacs.system
-  (:use :cl :asdf))
-
-(in-package :climacs.system)
+(cl:in-package #:asdf-user)
 
 (defsystem :first-climacs
   :depends-on (:mcclim :flexichain)
