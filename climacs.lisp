@@ -50,8 +50,8 @@
   ;; processes, so start a new processes and THEN setup the colors.
   (declare (ignore text-style width height))
   (flet ((run ()
-           (let ((*background-color* +black+)
-                 (*foreground-color* +gray+)
+           (let ((drei:*background-color* +black+)
+                 (drei:*foreground-color* +gray+)
                  (*info-bg-color* +darkslategray+)
                  (*info-fg-color* +gray+)
                  (*mini-bg-color* +black+)
