@@ -195,7 +195,7 @@ editing C code."))
 editing Java(tm) code."))
 
 (defpackage :climacs
-  (:use :clim-lisp :clim :clim-sys :clim-extensions :climacs1-gui :drei)
+  (:use :clim-lisp :clim :clim-sys :clim-extensions :climacs1-gui)
   (:export #:climacs
            #:climacs-rv
            #:edit-definition
