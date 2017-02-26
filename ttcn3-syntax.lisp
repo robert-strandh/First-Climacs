@@ -19,9 +19,10 @@
 ;;; Boston, MA  02111-1307  USA.
 
 (defpackage #:climacs-ttcn3-syntax
-  (:use :clim-lisp :clim :clim-extensions :drei-buffer :drei-base 
+  (:use :clim-lisp :clim :clim-extensions :drei-buffer :drei-base
 	:drei-syntax :flexichain :drei :drei-fundamental-syntax)
   (:export))
+
 (cl:in-package #:climacs-ttcn3-syntax)
 
 (defgeneric display-parse-tree (parse-symbol pane drei syntax))
@@ -144,13 +145,13 @@
   `(progn
      (defclass ,name (ttcn3-entry) ())
      (defclass ,empty-name (,name) ())
-     
+
      (defclass ,nonempty-name (,name)
        ((items :initarg :items)
 	(item :initarg :item)))
-     
+
      (add-rule (grammar-rule (,name -> () (make-instance ',empty-name))) *ttcn3-grammar*)
-     
+
      (add-rule (grammar-rule
 		(,name -> (,name ,item-name)
 		       (make-instance ',nonempty-name
@@ -160,7 +161,7 @@
                                     (drei drei) (syntax ttcn3-syntax))
        (declare (ignore pane))
        nil)
-     
+
      (defmethod display-parse-tree ((entity ,nonempty-name) (pane clim-stream-pane)
                                     (drei drei) (syntax ttcn3-syntax))
        (with-slots (items item) entity
@@ -272,8 +273,9 @@
   (:== ttcn3-module
        ttcn3-module-keyword ttcn3-module-id
        block-open opt-module-definitions-part
-					; opt-module-control-part
-       block-close			; opt-with-statement
+       ;; opt-module-control-part
+       ;; opt-with-statement
+       block-close
        opt-semicolon)
   (:= opt-module-definitions-part
       (or module-definitions-part empty-ttcn3-terminals))
@@ -297,18 +299,18 @@
   (:= module-definition-and-optional-semicolon
       module-definition opt-semicolon)
   (:= module-definition
-      (or ; type-def
-					const-def
-					; template-def
-					; module-par-def
-					; function-def
-					; signature-def
-					; testcase-def
-					; altstep-def
-					; import-def
-					; group-def
-					; ext-function-def
-					; ext-const-def
+      (or ;; type-def
+          const-def
+          ;; template-def
+          ;; module-par-def
+          ;; function-def
+          ;; signature-def
+          ;; testcase-def
+          ;; altstep-def
+          ;; import-def
+          ;; group-def
+          ;; ext-function-def
+          ;; ext-const-def
        ))
   (:= const-def const-keyword ttcn3-type const-list)
   (:= const-list single-const-def comma-sep-single-const-defs)
@@ -322,7 +324,6 @@
       identifier)
   (:= constant-expression
       (or identifier number-form)))
-      
 
 (defmethod display-parse-tree ((entity ttcn3-terminal) (pane clim-stream-pane)
                                (drei drei) (syntax ttcn3-syntax))
@@ -446,7 +447,7 @@
 	    ;; go back to the first token after top, or until the previous token
 	    ;; contains a valid parser state
 	    (loop until (or (mark<= (end-offset (lexeme lexer (1- start-token-index))) top)
-			    (not (parse-state-empty-p 
+			    (not (parse-state-empty-p
 				  (slot-value (lexeme lexer (1- start-token-index)) 'state))))
                do (decf start-token-index))
 	    (let ((*white-space-start* (offset top)))
