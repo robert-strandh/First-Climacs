@@ -18,7 +18,7 @@
 ;;; Free Software Foundation, Inc., 59 Temple Place - Suite 330,
 ;;; Boston, MA  02111-1307  USA.
 
-(defpackage :climacs-slidemacs-editor
+(defpackage #:climacs-slidemacs-editor
   (:use :clim-lisp :clim :clim-extensions :drei-buffer :drei-base 
 	:drei-syntax :flexichain :drei :drei-fundamental-syntax)
   (:export))

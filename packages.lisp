@@ -24,7 +24,7 @@
 
 (cl:in-package #:cl-user)
 
-(defpackage :climacs1-gui
+(defpackage #:climacs1-gui
     (:use :clim-lisp :clim :drei-buffer :drei-base
           :drei-abbrev :drei-syntax :drei-motion
           :drei-kill-ring :drei-core :drei :clim-extensions
@@ -103,7 +103,7 @@
              #:with-typeout
              #:invoke-with-typeout))
 
-(defpackage :climacs-core
+(defpackage #:climacs-core
   (:use :clim-lisp :drei-base :drei-buffer :drei-fundamental-syntax
         :drei-syntax :drei-motion :drei :drei-kill-ring
         :drei-editing :climacs1-gui :clim :drei-abbrev :esa :esa-buffer :esa-io
@@ -155,7 +155,7 @@
   features that require a fairly high-level view of the
   application, but are not solely GUI-specific."))
 
-(defpackage :climacs-commands
+(defpackage #:climacs-commands
   (:use :clim-lisp :clim :esa-utils :drei-base :drei-buffer
         :drei-syntax :drei-motion :drei-editing
         :climacs1-gui :esa :drei-kill-ring :drei
@@ -164,16 +164,16 @@
   command definitions, as well as some useful automatic
   command-defining facilities."))
 
-(defpackage :climacs-html-syntax
+(defpackage #:climacs-html-syntax
   (:use :clim-lisp :clim :drei-buffer :drei-base
 	:drei-syntax :flexichain :drei :drei-fundamental-syntax))
 
-(defpackage :climacs-text-syntax
+(defpackage #:climacs-text-syntax
   (:use :clim-lisp :clim :drei-buffer :drei-base
 	:drei-syntax :flexichain :drei :drei-fundamental-syntax
         :esa-utils))
 
-(defpackage :climacs-prolog-syntax
+(defpackage #:climacs-prolog-syntax
   (:use :clim-lisp :clim :drei-buffer :drei-base
 	:drei-syntax :flexichain :drei :climacs-core :drei-fundamental-syntax
         :drei :esa-utils)
@@ -184,19 +184,19 @@
            #:open
            #:variable))
 
-(defpackage :climacs-cl-syntax
+(defpackage #:climacs-cl-syntax
   (:use :clim-lisp :clim :drei-buffer :drei-base
 	:drei-syntax :flexichain :drei :drei-fundamental-syntax)
   (:export))
 
-(defpackage :climacs-structedit
+(defpackage #:climacs-structedit
   (:use :clim-lisp :clim :esa :esa-utils :drei :drei-buffer :drei-base :drei-core
         :drei-motion :drei-editing :drei-syntax :drei-lr-syntax :drei-lisp-syntax)
   (:shadow clim:form)
   (:export #:structedit-mode
            #:structedit-table))
 
-(defpackage :climacs-c-syntax
+(defpackage #:climacs-c-syntax
   (:use :clim-lisp :clim :clim-extensions :drei-buffer :drei-base
 	:drei-syntax :drei-fundamental-syntax :flexichain :drei
 	:drei-motion :drei-editing :esa-utils :esa :drei-core :esa-io
@@ -206,7 +206,7 @@
   (:documentation "Implementation of the syntax module used for
 editing C code."))
 
-(defpackage :climacs-java-syntax
+(defpackage #:climacs-java-syntax
   (:use :clim-lisp :clim :clim-extensions :drei-buffer :drei-base
 	:drei-syntax :drei-fundamental-syntax :flexichain :drei
 	:drei-motion :drei-editing :esa-utils :esa :drei-core :esa-io
@@ -216,7 +216,7 @@ editing C code."))
   (:documentation "Implementation of the syntax module used for
 editing Java(tm) code."))
 
-(defpackage :climacs
+(defpackage #:climacs
   (:use :common-lisp)
   (:export #:climacs
            #:climacs-rv
