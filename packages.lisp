@@ -190,7 +190,7 @@
   (:export))
 
 (defpackage #:climacs-structedit
-  (:use :common-lisp :drei-lisp-syntax)
+  (:use :common-lisp)
   (:shadow clim:form)
   (:export #:structedit-mode
            #:structedit-table))
