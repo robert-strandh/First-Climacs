@@ -29,11 +29,11 @@
 (in-package :climacs)
 
 (defun find-climacs-frame ()
-  (let ((frame-manager (find-frame-manager)))
+  (let ((frame-manager (clim:find-frame-manager)))
     (when frame-manager
       (find-if (lambda (x) (and (typep x 'climacs1-gui:climacs) 
                                 (eq (clim:frame-state x) :enabled)))
-               (frame-manager-frames frame-manager)))))
+               (clim:frame-manager-frames frame-manager)))))
 
 (defun climacs (&rest args &key new-process (process-name "Climacs")
 		(text-style climacs1-gui:*climacs-text-style*)
@@ -50,12 +50,12 @@
   ;; processes, so start a new processes and THEN setup the colors.
   (declare (ignore text-style width height))
   (flet ((run ()
-           (let ((drei:*background-color* +black+)
-                 (drei:*foreground-color* +gray+)
-                 (climacs1-gui:*info-bg-color* +darkslategray+)
-                 (climacs1-gui:*info-fg-color* +gray+)
-                 (climacs1-gui:*mini-bg-color* +black+)
-                 (climacs1-gui:*mini-fg-color* +white+))
+           (let ((drei:*background-color* clim:+black+)
+                 (drei:*foreground-color* clim:+gray+)
+                 (climacs1-gui:*info-bg-color* clim:+darkslategray+)
+                 (climacs1-gui:*info-fg-color* clim:+gray+)
+                 (climacs1-gui:*mini-bg-color* clim:+black+)
+                 (climacs1-gui:*mini-fg-color* clim:+white+))
              (apply #'climacs-common nil :new-process nil args))))
     (if new-process
         (clim-sys:make-process #'run :name process-name)
@@ -79,20 +79,22 @@ can be a filename (edit the file) or symbol (edit its function definition)."
                      :expected-type '(or null string pathname symbol))))))
     (if climacs-frame
         (when command
-          (execute-frame-command climacs-frame command))
+          (clim:execute-frame-command climacs-frame command))
         (apply #'climacs-common command :new-process t args)))
   t)
 
 (defun climacs-common (command &key new-process (process-name "Climacs")
 		       (text-style climacs1-gui:*climacs-text-style*)
                        (width 900) (height 400))
-  (let* ((frame (make-application-frame 'climacs1-gui:climacs :width width :height height))
+  (let* ((frame (clim:make-application-frame 'climacs1-gui:climacs
+                                             :width width :height height))
 	 (climacs1-gui:*climacs-text-style* text-style)
-         (*application-frame* frame)
+         (clim:*application-frame* frame)
          (esa:*esa-instance* frame))
-    (adopt-frame (find-frame-manager) *application-frame*)
-    (when command (execute-frame-command *application-frame* command))
-    (flet ((run () (run-frame-top-level frame)))
+    (clim:adopt-frame (clim:find-frame-manager) clim:*application-frame*)
+    (when command
+      (clim:execute-frame-command clim:*application-frame* command))
+    (flet ((run () (clim:run-frame-top-level frame)))
       (if new-process
           (clim-sys:make-process #'run :name process-name)
           (run)))))
@@ -101,4 +103,5 @@ can be a filename (edit the file) or symbol (edit its function definition)."
 ;;; preferred editor
 #+sbcl
 (unless (member 'edit-file sb-ext:*ed-functions*)
-  (setf sb-ext:*ed-functions* (append sb-ext:*ed-functions* (list 'edit-file))))
+  (setf sb-ext:*ed-functions*
+        (append sb-ext:*ed-functions* (list 'edit-file))))
