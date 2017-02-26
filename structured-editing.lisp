@@ -234,7 +234,7 @@ after the point."
   (let ((form-around (form-around (current-syntax) (offset (point))))
         (form-after (form-after (current-syntax) (offset (point))))
         (comment (comment-at-mark (current-syntax) (point))))
-    (cond ((empty-line-p (point))
+    (cond ((drei-base:empty-line-p (point))
            (forward-delete-object (point)))
           ((in-string-p (current-syntax) (point))
            (if (= (buffer-line-number (esa:current-buffer)
@@ -242,23 +242,27 @@ after the point."
                   (line-number (point)))
                ;; Delete from point until the end of the string, but
                ;; keep the ending delimiter.
-               (kill-region (point) (1- (end-offset form-around)))
+               (drei-base:kill-region (point) (1- (end-offset form-around)))
                ;; Delete from point until end of line.
-               (kill-region (point) (end-of-line (clone-mark (point))))))
+               (drei-base:kill-region (point)
+                                      (end-of-line (clone-mark (point))))))
           ((in-line-comment-p (current-syntax) (point))
            ;; Delete until end of line
-           (kill-region (point) (end-of-line (clone-mark (point)))))
+           (drei-base:kill-region (point)
+                                  (end-of-line (clone-mark (point)))))
           ((in-long-comment-p (current-syntax) (point))
            (if (= (buffer-line-number (esa:current-buffer)
                                       (end-offset comment))
                   (line-number (point)))
                ;; End of comment on same line as point, if a complete
                ;; long comment, don't delete the ending delimiter
-               (kill-region (point) (- (end-offset comment)
-                                       (if (form-complete-p comment)
-                                           2 0)))
+               (drei-base:kill-region (point)
+                                      (- (end-offset comment)
+                                         (if (form-complete-p comment)
+                                             2 0)))
                ;; Delete from point until end of line.
-               (kill-region (point) (end-of-line (clone-mark (point))))))
+               (drei-base:kill-region (point)
+                                      (end-of-line (clone-mark (point))))))
           ((and form-after
                 (= (buffer-line-number (esa:current-buffer)
                                        (start-offset form-after))
