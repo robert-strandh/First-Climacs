@@ -46,8 +46,8 @@
 
 (defun delete-form (buffer form)
   "Delete `form' from `buffer'."
-  (delete-buffer-range
-   buffer (start-offset form) (size form)))
+  (drei-buffer:delete-buffer-range
+   buffer (start-offset form) (drei-buffer:size form)))
 
 (define-command (com-open-list :name t :command-table structedit-table)
     ((n 'integer :default 0))
@@ -62,8 +62,9 @@ character literal with #\(."
          (insert-character #\())
         ((in-character-p (current-syntax) (point))
          (delete-form (esa:current-buffer)
-                      (form-around (current-syntax) (offset (point))))
-         (insert-sequence (point) "#\\("))
+                      (form-around (current-syntax)
+                                   (drei-buffer:offset (point))))
+         (drei-buffer:insert-sequence (point) "#\\("))
         (t
          (when (and (not (zerop n))
                     (forward-expression (point) (current-syntax) 1 nil))
@@ -71,7 +72,7 @@ character literal with #\(."
          (insert-character #\()
          (forward-expression (point) (current-syntax) n nil)
          (insert-character #\))
-         (backward-object (point))
+         (drei-buffer:backward-object (point))
          (backward-expression (point) (current-syntax) n nil))))
 
 (define-command (com-wrap-expression :name t :command-table structedit-table)
@@ -92,10 +93,11 @@ preserving structural validity."
          (insert-character #\)))
         ((in-character-p (current-syntax) (point))
          (delete-form (esa:current-buffer)
-                      (form-around (current-syntax) (offset (point))))
-         (insert-sequence (point) "#\\)"))
+                      (form-around (current-syntax)
+                                   (drei-buffer:offset (point))))
+         (drei-buffer:insert-sequence (point) "#\\)"))
         ((forward-up (point) (current-syntax) 1 nil)
-         (insert-object (point) #\Newline)
+         (drei-buffer:insert-object (point) #\Newline)
          (indent-current-line (current-view) (point)))))
 
 (defun delete-object-structurally (delete-fn move-fn immediate-form-fn
@@ -108,26 +110,28 @@ either `forward-delete-object' or `backward-delete-object',
 either `end-offset' or `begin-offset', `at-border-fn' is a
 function used to determine whether or not `(point)' is at the end
 of a structural object."
-  (let ((immediate-form (funcall immediate-form-fn (current-syntax) (offset (point))))
-        (form-around (form-around (current-syntax) (offset (point))))
+  (let ((immediate-form (funcall immediate-form-fn (current-syntax)
+                                 (drei-buffer:offset (point))))
+        (form-around (form-around (current-syntax)
+                                  (drei-buffer:offset (point))))
         (list-at-mark (list-at-mark (current-syntax) (point)))
         (string-at-mark (form-of-type-at-mark (current-syntax) (point) #'form-string-p)))
     (cond ((and (or (form-string-p immediate-form)
                     (form-list-p immediate-form))
                 (= (funcall border-offset-fn immediate-form)
-                   (offset (point))))
+                   (drei-buffer:offset (point))))
            (funcall move-fn (point)))
           ((and (funcall at-border-fn (current-syntax) (point))
                 form-around)
            (when (or (and list-at-mark
                           (null (form-children list-at-mark)))
                      (and string-at-mark
-                          (= (size string-at-mark) 2)))
+                          (= (drei-buffer:size string-at-mark) 2)))
              (delete-form (esa:current-buffer)
                           form-around)))
           ((and (form-character-p immediate-form)
                 (= (funcall border-offset-fn immediate-form)
-                   (offset (point))))
+                   (drei-buffer:offset (point))))
            (delete-form (esa:current-buffer)
                         immediate-form))
           (t (funcall delete-fn (point))))))
@@ -143,7 +147,8 @@ whole S-expression. If `force' is true, simply delete a character
 forward, without regard for delimiter balancing."
   (if force
       (forward-delete-object (point))
-      (delete-object-structurally #'forward-delete-object #'forward-object
+      (delete-object-structurally #'forward-delete-object
+                                  #'drei-buffer:forward-object
                                   #'form-after #'start-offset
                                   #'location-at-end-of-form)))
 
@@ -158,7 +163,8 @@ whole S-expression. If `force' is true, simply delete a
 character backward, without regard for delimiter balancing."
   (if force
       (backward-delete-object (point))
-      (delete-object-structurally #'backward-delete-object #'backward-object
+      (delete-object-structurally #'backward-delete-object
+                                  #'drei-buffer:backward-object
                                   #'form-before #'end-offset
                                   #'location-at-beginning-of-form)))
 
@@ -175,19 +181,20 @@ If in a character literal, replace the character literal with #\\\"."
   (cond ((in-comment-p (current-syntax) (point))
          (insert-character #\"))
         ((at-end-of-string-p (current-syntax) (point))
-         (forward-object (point)))
+         (drei-buffer:forward-object (point)))
         ((in-string-p (current-syntax) (point))
-         (insert-sequence (point) "\\\""))
+         (drei-buffer:insert-sequence (point) "\\\""))
         ((in-character-p (current-syntax) (point))
          (delete-form (esa:current-buffer)
-                      (form-around (current-syntax) (offset (point))))
-         (insert-sequence (point) "#\\\""))
+                      (form-around (current-syntax)
+                                   (drei-buffer:offset (point))))
+         (drei-buffer:insert-sequence (point) "#\\\""))
         (t
-         (let ((old-offset (offset (point))))
+         (let ((old-offset (drei-buffer:offset (point))))
            (forward-expression (point) (current-syntax) n nil)
-           (insert-buffer-object (esa:current-buffer) old-offset #\")
+           (drei-buffer:insert-buffer-object (esa:current-buffer) old-offset #\")
            (insert-character #\")
-           (backward-object (point))
+           (drei-buffer:backward-object (point))
            (backward-expression (point) (current-syntax) (min 1 n) nil)))))
 
 (define-command (com-wrap-expression-in-doublequote :name t :command-table structedit-table)
@@ -197,7 +204,7 @@ If not in a string, act as `Insert Double Quote Structurally'; if
 no prefix argument is specified, the default is to wrap one
 S-expression, however, not zero."
   (if (in-string-p (current-syntax) (point))
-      (setf (offset (point))
+      (setf (drei-buffer:offset (point))
             (1+ (end-offset (form-around (current-syntax) (point)))))
       (com-insert-double-quote-structurally n)))
 
@@ -209,19 +216,24 @@ backward in the current list before splicing all S-expressions
 forward into the enclosing list."
   (let ((list (list-at-mark (current-syntax) (point))))
     (when list
-      (let ((begin-mark (make-buffer-mark (esa:current-buffer)
-                                          (start-offset list)))
-            (end-mark (make-buffer-mark (esa:current-buffer)
-                                        (end-offset list))))
+      (let ((begin-mark (drei-buffer:make-buffer-mark (esa:current-buffer)
+                                                      (start-offset list)))
+            (end-mark (drei-buffer:make-buffer-mark (esa:current-buffer)
+                                                    (end-offset list))))
         (when kill-backward
-          (loop until (eq (list-at-mark (current-syntax) (offset (point)))
-                          (or (form-before (current-syntax) (offset (point)))
-                              (form-around (current-syntax) (offset (point)))))
+          (loop until (eq (list-at-mark (current-syntax)
+                                        (drei-buffer:offset (point)))
+                          (or (form-before (current-syntax)
+                                           (drei-buffer:offset (point)))
+                              (form-around (current-syntax)
+                                           (drei-buffer:offset (point)))))
              do (backward-delete-expression (point) (current-syntax) 1 nil)))
-        (delete-buffer-range (esa:current-buffer)
-                             (offset begin-mark) 1)
-        (delete-buffer-range (esa:current-buffer)
-                             (1- (offset end-mark)) 1)))))
+        (drei-buffer:delete-buffer-range
+         (esa:current-buffer)
+         (drei-buffer:offset begin-mark) 1)
+        (drei-buffer:delete-buffer-range
+         (esa:current-buffer)
+         (1- (drei-buffer:offset end-mark)) 1)))))
 
 (define-command (com-kill-line-structurally :name t :command-table structedit-table)
     ()
@@ -231,29 +243,35 @@ the closing string delimiter.  On a line with no S-expressions on
 it starting after the point or within a comment, act exactly as
 \"Kill Line\".  Otherwise, kill all S-expressions that start
 after the point."
-  (let ((form-around (form-around (current-syntax) (offset (point))))
-        (form-after (form-after (current-syntax) (offset (point))))
+  (let ((form-around (form-around (current-syntax)
+                                  (drei-buffer:offset (point))))
+        (form-after (form-after (current-syntax)
+                                (drei-buffer:offset (point))))
         (comment (comment-at-mark (current-syntax) (point))))
     (cond ((drei-base:empty-line-p (point))
            (forward-delete-object (point)))
           ((in-string-p (current-syntax) (point))
-           (if (= (buffer-line-number (esa:current-buffer)
-                                      (end-offset form-around))
-                  (line-number (point)))
+           (if (= (drei-buffer:buffer-line-number
+                   (esa:current-buffer)
+                   (end-offset form-around))
+                  (drei-buffer:line-number (point)))
                ;; Delete from point until the end of the string, but
                ;; keep the ending delimiter.
                (drei-base:kill-region (point) (1- (end-offset form-around)))
                ;; Delete from point until end of line.
-               (drei-base:kill-region (point)
-                                      (end-of-line (clone-mark (point))))))
+               (drei-base:kill-region
+                (point)
+                (drei-buffer:end-of-line (drei-buffer:clone-mark (point))))))
           ((in-line-comment-p (current-syntax) (point))
            ;; Delete until end of line
-           (drei-base:kill-region (point)
-                                  (end-of-line (clone-mark (point)))))
+           (drei-base:kill-region
+            (point)
+            (drei-buffer:end-of-line (drei-buffer:clone-mark (point)))))
           ((in-long-comment-p (current-syntax) (point))
-           (if (= (buffer-line-number (esa:current-buffer)
-                                      (end-offset comment))
-                  (line-number (point)))
+           (if (= (drei-buffer:buffer-line-number
+                   (esa:current-buffer)
+                   (end-offset comment))
+                  (drei-buffer:line-number (point)))
                ;; End of comment on same line as point, if a complete
                ;; long comment, don't delete the ending delimiter
                (drei-base:kill-region (point)
@@ -261,18 +279,22 @@ after the point."
                                          (if (form-complete-p comment)
                                              2 0)))
                ;; Delete from point until end of line.
-               (drei-base:kill-region (point)
-                                      (end-of-line (clone-mark (point))))))
+               (drei-base:kill-region
+                (point)
+                (drei-buffer:end-of-line (drei-buffer:clone-mark (point))))))
           ((and form-after
-                (= (buffer-line-number (esa:current-buffer)
-                                       (start-offset form-after))
-                   (line-number (point))))
+                (= (drei-buffer:buffer-line-number
+                    (esa:current-buffer)
+                    (start-offset form-after))
+                   (drei-buffer:line-number (point))))
            (forward-kill-expression (point) (current-syntax))
-           (loop for form-after = (form-after (current-syntax) (offset (point)))
+           (loop for form-after = (form-after (current-syntax)
+                                              (drei-buffer:offset (point)))
                  while (and form-after
-                            (= (buffer-line-number (esa:current-buffer)
-                                                   (start-offset form-after))
-                               (line-number (point))))
+                            (= (drei-buffer:buffer-line-number
+                                (esa:current-buffer)
+                                (start-offset form-after))
+                               (drei-buffer:line-number (point))))
                  do (forward-kill-expression (point) (current-syntax) 1 t)))
           (t (forward-kill-line (point) (current-syntax) 1 t nil)))))
 
