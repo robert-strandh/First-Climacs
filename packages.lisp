@@ -1,4 +1,4 @@
-;;;  (c) copyright 2004-2005 by
+;;;  (c) copyright 2004-2005, 2017 by
 ;;;           Robert Strandh (robert.strandh@gmail.com)
 ;;;  (c) copyright 2005 by
 ;;;           Matthieu Villeneuve (matthieu.villeneuve@free.fr)
@@ -34,19 +34,27 @@
     (:export #:climacs                  ; Frame.
              #:*climacs-text-style*
 
-             #:climacs-buffer #:external-format
+             #:climacs-buffer
+             #:external-format
              #:climacs-pane
              #:climacs-info-pane
              #:kill-ring
 
              ;; View-stuff
              #:views
-             #:view-setting-error #:view
+             #:view-setting-error
+             #:view
              #:unknown-view
-             #:view-already-displayed #:window
+             #:view-already-displayed
+             #:window
              ;; Restarts
-             #:switch-to-pane #:remove-other-use #:remove-other-pane #:clone-view #:cancel
-             #:any-view #:any-undisplayed-view
+             #:switch-to-pane
+             #:remove-other-use
+             #:remove-other-pane
+             #:clone-view
+             #:cancel
+             #:any-view
+             #:any-undisplayed-view
              #:clone-view-for-climacs
              #:make-new-view-for-climacs
 
@@ -55,7 +63,7 @@
              #:syntax
              #:mark
              #:buffers
-             
+
              #:active-group
              #:groups
              #:display-window
@@ -65,8 +73,7 @@
              #:buffer-pane-p
              #:display-view-info-to-info-pane
              #:display-view-status-to-info-pane
-             
-           
+
              ;; Some configuration variables
              #:*info-bg-color*
              #:*info-fg-color*
@@ -77,16 +84,24 @@
              #:*climacs-target-creator*
 
              ;; The command tables
-             #:global-climacs-table #:keyboard-macro-table #:climacs-help-table
-             #:base-table #:buffer-table #:case-table 
+             #:global-climacs-table
+             #:keyboard-macro-table
+             #:climacs-help-table
+             #:base-table
+             #:buffer-table
+             #:case-table
              #:development-table
              #:info-table
-             #:window-table #:window-menu-table
+             #:window-table
+             #:window-menu-table
 
              ;; Typeout
-             #:typeout-view #:typeout-view-p
-             #:with-typeout-view #:invoke-with-typeout-view
-             #:with-typeout #:invoke-with-typeout))
+             #:typeout-view
+             #:typeout-view-p
+             #:with-typeout-view
+             #:invoke-with-typeout-view
+             #:with-typeout
+             #:invoke-with-typeout))
 
 (defpackage :climacs-core
   (:use :clim-lisp :drei-base :drei-buffer :drei-fundamental-syntax
@@ -98,8 +113,9 @@
            #:object=
            #:no-upper-p
            #:case-relevant-test
-           
-           #:switch-to-view #:switch-or-move-to-view
+
+           #:switch-to-view
+           #:switch-or-move-to-view
            #:make-new-buffer
            #:kill-view
 
@@ -107,7 +123,8 @@
            #:update-attribute-line
            #:evaluate-attribute-line
            #:directory-pathname-p
-           #:find-file #:find-file-read-only
+           #:find-file
+           #:find-file-read-only
            #:directory-of-buffer
            #:set-visited-filename
            #:check-file-times
@@ -160,10 +177,15 @@
   (:use :clim-lisp :clim :drei-buffer :drei-base
 	:drei-syntax :flexichain :drei :climacs-core :drei-fundamental-syntax
         :drei :esa-utils)
-  (:shadow #:atom #:close #:exp #:integer #:open #:variable))
+  (:shadow #:atom
+           #:close
+           #:exp
+           #:integer
+           #:open
+           #:variable))
 
 (defpackage :climacs-cl-syntax
-  (:use :clim-lisp :clim :drei-buffer :drei-base 
+  (:use :clim-lisp :clim :drei-buffer :drei-base
 	:drei-syntax :flexichain :drei :drei-fundamental-syntax)
   (:export))
 
