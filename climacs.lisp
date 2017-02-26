@@ -31,19 +31,19 @@
 (defun find-climacs-frame ()
   (let ((frame-manager (find-frame-manager)))
     (when frame-manager
-      (find-if (lambda (x) (and (typep x 'climacs) 
+      (find-if (lambda (x) (and (typep x 'climacs1-gui:climacs) 
                                 (eq (clim:frame-state x) :enabled)))
                (frame-manager-frames frame-manager)))))
 
 (defun climacs (&rest args &key new-process (process-name "Climacs")
-		(text-style *climacs-text-style*)
+		(text-style climacs1-gui:*climacs-text-style*)
                 (width 900) (height 400))
   "Starts up a climacs session"
   (declare (ignore new-process process-name width height text-style))
   (apply #'climacs-common nil args))
 
 (defun climacs-rv (&rest args &key new-process (process-name "Climacs")
-		   (text-style *climacs-text-style*)
+		   (text-style climacs1-gui:*climacs-text-style*)
                    (width 900) (height 400))
   "Starts up a climacs session with alternative colors."
   ;; SBCL doesn't inherit dynamic bindings when starting new
@@ -52,10 +52,10 @@
   (flet ((run ()
            (let ((drei:*background-color* +black+)
                  (drei:*foreground-color* +gray+)
-                 (*info-bg-color* +darkslategray+)
-                 (*info-fg-color* +gray+)
-                 (*mini-bg-color* +black+)
-                 (*mini-fg-color* +white+))
+                 (climacs1-gui:*info-bg-color* +darkslategray+)
+                 (climacs1-gui:*info-fg-color* +gray+)
+                 (climacs1-gui:*mini-bg-color* +black+)
+                 (climacs1-gui:*mini-fg-color* +white+))
              (apply #'climacs-common nil :new-process nil args))))
     (if new-process
         (clim-sys:make-process #'run :name process-name)
@@ -63,7 +63,7 @@
 
 (defun edit-file (thing &rest args
                   &key (process-name "Climacs") (width 900) (height 400)
-		  (text-style *climacs-text-style*))
+		  (text-style climacs1-gui:*climacs-text-style*))
   "Edit THING in an existing climacs process or start a new one. THING
 can be a filename (edit the file) or symbol (edit its function definition)."
   (declare (ignore process-name width height text-style))
@@ -84,10 +84,10 @@ can be a filename (edit the file) or symbol (edit its function definition)."
   t)
 
 (defun climacs-common (command &key new-process (process-name "Climacs")
-		       (text-style *climacs-text-style*)
+		       (text-style climacs1-gui:*climacs-text-style*)
                        (width 900) (height 400))
-  (let* ((frame (make-application-frame 'climacs :width width :height height))
-	 (*climacs-text-style* text-style)
+  (let* ((frame (make-application-frame 'climacs1-gui:climacs :width width :height height))
+	 (climacs1-gui:*climacs-text-style* text-style)
          (*application-frame* frame)
          (esa:*esa-instance* frame))
     (adopt-frame (find-frame-manager) *application-frame*)
