@@ -135,7 +135,7 @@ Signals and error if the file does not exist."
 ;;; Buffer commands
 
 (define-command (com-toggle-read-only :name t :command-table buffer-table)
-    ((buffer 'buffer :default (current-buffer *application-frame*)))
+    ((buffer 'buffer :default (current-buffer)))
   (setf (read-only-p buffer) (not (read-only-p buffer))))
 
 (define-presentation-to-command-translator toggle-read-only
@@ -145,7 +145,7 @@ Signals and error if the file does not exist."
   (list object))
 
 (define-command (com-toggle-modified :name t :command-table buffer-table)
-    ((buffer 'buffer :default (current-buffer *application-frame*)))
+    ((buffer 'buffer :default (current-buffer)))
   (setf (needs-saving buffer) (not (needs-saving buffer))))
 
 (define-presentation-to-command-translator toggle-modified
