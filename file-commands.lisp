@@ -74,7 +74,7 @@ appropriate for the syntax of the buffer."
   "Prompt for a filename and insert its contents at point.
 Leaves mark after the inserted contents."
   (when (probe-file filename)
-    (setf (mark) (clone-mark (point) :left))
+    (setf (mark (current-view)) (clone-mark (point) :left))
     (with-open-file (stream filename :direction :input)
       (input-from-stream stream
                          (current-buffer)
