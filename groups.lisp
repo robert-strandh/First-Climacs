@@ -124,9 +124,9 @@ the file with that name."
   (let ((norm-element (normalise-group-element element)))
    (typecase norm-element
      (drei-view
-      (present norm-element 'view stream))
+      (present norm-element 'view :stream stream))
      ((or pathname string)
-      (present norm-element 'pathname stream)))))
+      (present norm-element 'pathname :stream stream)))))
 
 ;; Singular group elements.
 (defmethod group-views ((group group-element))
