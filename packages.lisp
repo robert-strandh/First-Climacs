@@ -190,8 +190,7 @@
   (:export))
 
 (defpackage #:climacs-structedit
-  (:use :clim-lisp :clim :drei-core
-        :drei-motion :drei-syntax :drei-lisp-syntax)
+  (:use :clim-lisp :clim :drei-core :drei-syntax :drei-lisp-syntax)
   (:shadow clim:form)
   (:export #:structedit-mode
            #:structedit-table))
