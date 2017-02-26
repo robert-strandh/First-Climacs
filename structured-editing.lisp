@@ -59,9 +59,9 @@ S-expressions forward.  If in string or comment, insert a single
 opening parenthesis.  If in a character literal, replace the
 character literal with #\(."
   (cond ((in-string-p (drei:current-syntax) (drei:point))
-         (insert-character #\())
+         (drei-core:insert-character #\())
         ((in-comment-p (drei:current-syntax) (drei:point))
-         (insert-character #\())
+         (drei-core:insert-character #\())
         ((in-character-p (drei:current-syntax) (drei:point))
          (delete-form (esa:current-buffer)
                       (form-around (drei:current-syntax)
@@ -75,9 +75,9 @@ character literal with #\(."
            (drei-motion:backward-expression
             (drei:point)
             (drei:current-syntax) 1 nil))
-         (insert-character #\()
+         (drei-core:insert-character #\()
          (drei-motion:forward-expression (drei:point) (drei:current-syntax) n nil)
-         (insert-character #\))
+         (drei-core:insert-character #\))
          (drei-buffer:backward-object (drei:point))
          (drei-motion:backward-expression
           (drei:point)
@@ -100,7 +100,7 @@ preserving structural validity."
   "Move past one closing delimiter, add a newline, and reindent."
   (cond ((or (in-string-p (drei:current-syntax) (drei:point))
              (in-comment-p (drei:current-syntax) (drei:point)))
-         (insert-character #\)))
+         (drei-core:insert-character #\)))
         ((in-character-p (drei:current-syntax) (drei:point))
          (delete-form (esa:current-buffer)
                       (form-around (drei:current-syntax)
@@ -108,7 +108,7 @@ preserving structural validity."
          (drei-buffer:insert-sequence (drei:point) "#\\)"))
         ((drei-motion:forward-up (drei:point) (drei:current-syntax) 1 nil)
          (drei-buffer:insert-object (drei:point) #\Newline)
-         (indent-current-line (drei:current-view) (drei:point)))))
+         (drei-core:indent-current-line (drei:current-view) (drei:point)))))
 
 (defun delete-object-structurally (delete-fn move-fn immediate-form-fn
                                    border-offset-fn
@@ -192,7 +192,7 @@ At the end of a string, move past the closing double-quote.
 In the middle of a string, insert a backslash-escaped double-quote.
 If in a character literal, replace the character literal with #\\\"."
   (cond ((in-comment-p (drei:current-syntax) (drei:point))
-         (insert-character #\"))
+         (drei-core:insert-character #\"))
         ((at-end-of-string-p (drei:current-syntax) (drei:point))
          (drei-buffer:forward-object (drei:point)))
         ((in-string-p (drei:current-syntax) (drei:point))
@@ -206,7 +206,7 @@ If in a character literal, replace the character literal with #\\\"."
          (let ((old-offset (drei-buffer:offset (drei:point))))
            (drei-motion:forward-expression (drei:point) (drei:current-syntax) n nil)
            (drei-buffer:insert-buffer-object (esa:current-buffer) old-offset #\")
-           (insert-character #\")
+           (drei-core:insert-character #\")
            (drei-buffer:backward-object (drei:point))
            (drei-motion:backward-expression
             (drei:point)
