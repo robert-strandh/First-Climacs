@@ -772,6 +772,7 @@
 ;;;
 ;;; CSR, 2005-05-26.
 (defmethod slot-missing (class (lterm lterm) name operation &optional value)
+  (declare (ignore value))
   (case operation
     (slot-value (slot-value (term lterm) name))))
 
