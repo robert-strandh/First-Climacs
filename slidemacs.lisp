@@ -23,7 +23,7 @@
 	:drei-syntax :flexichain :drei :drei-fundamental-syntax)
   (:export))
 
-(in-package :climacs-slidemacs-editor)
+(cl:in-package #:climacs-slidemacs-editor)
 
 (defgeneric display-parse-tree (entity syntax pane))
 

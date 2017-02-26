@@ -28,7 +28,7 @@
 
 ;;; Commands specific to the C syntax for Climacs.
 
-(in-package :climacs-c-syntax)
+(cl:in-package #:climacs-c-syntax)
 
 ;;; This command table is used when Drei runs as a pane.
 (make-command-table 'pane-c-table

@@ -26,7 +26,7 @@
 
 ;;; GUI for the Climacs editor. 
 
-(in-package :climacs1-gui)
+(cl:in-package #:climacs1-gui)
 
 (defvar *default-external-format* :utf-8
   "The encoding to use by default when reading and saving

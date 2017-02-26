@@ -20,7 +20,7 @@
 
 ;;; Add Climacs-dependent functionality to the stock Lisp syntax.
 
-(in-package :drei-lisp-syntax)
+(cl:in-package #:drei-lisp-syntax)
 
 (defmethod frame-clear-completions ((frame climacs1-gui:climacs))
   (let ((completions-pane

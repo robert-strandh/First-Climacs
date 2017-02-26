@@ -52,7 +52,7 @@
 ;;;       Right stickies at non whitespace characters preceeded by space and punctuation.
 ;;;       
 
-(in-package :climacs-text-syntax)
+(cl:in-package #:climacs-text-syntax)
 
 (defun index-of-mark-after-offset (flexichain offset)
   "Searches for the mark after `offset' in the marks stored in `flexichain'."

@@ -22,7 +22,7 @@
 
 ;;;# Syntax module for analysing Java(TM)
 
-(in-package :climacs-java-syntax)
+(cl:in-package #:climacs-java-syntax)
 
 ;;;# The command table.
 

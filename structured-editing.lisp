@@ -28,7 +28,7 @@
 
 ;;; You must do M-x Structedit Mode to enable these commands.
 
-(in-package :climacs-structedit)
+(cl:in-package #:climacs-structedit)
 
 (define-syntax-mode structedit-mode ()
   ()

@@ -9,7 +9,7 @@
 ;;;  (c) copyright 2006 by
 ;;;           Troels Henriksen (athas@sigkill.dk)
 
-(in-package :climacs-core)
+(cl:in-package #:climacs-core)
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; 

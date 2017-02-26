@@ -24,7 +24,7 @@
 
 ;;; Commands for developing the Climacs editor. 
 
-(in-package :climacs-commands)
+(cl:in-package #:climacs-commands)
 
 (define-command (com-reset-profile :name t :command-table development-table) ()
   #+sbcl (sb-profile:reset)

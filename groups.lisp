@@ -18,7 +18,7 @@
 
 ;;; Implementation of a groups concept.
 
-(in-package :climacs-core)
+(cl:in-package #:climacs-core)
 
 (defvar *persistent-groups* (make-hash-table :test #'equal)
   "A hash table of groups that are persistent across invocations

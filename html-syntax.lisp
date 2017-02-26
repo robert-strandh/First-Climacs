@@ -18,7 +18,7 @@
 
 ;;; Syntax for analysing HTML
 
-(in-package :climacs-html-syntax)
+(cl:in-package #:climacs-html-syntax)
 
 (define-syntax html-syntax (fundamental-syntax)
   ((lexer :reader lexer)

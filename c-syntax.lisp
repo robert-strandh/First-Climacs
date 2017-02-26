@@ -22,7 +22,7 @@
 
 ;;; Syntax module for analysing C
 
-(in-package :climacs-c-syntax)
+(cl:in-package #:climacs-c-syntax)
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;

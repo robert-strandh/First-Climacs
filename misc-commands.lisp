@@ -26,7 +26,7 @@
 
 ;;; miscellaneous commands for the Climacs editor. 
 
-(in-package :climacs-commands)
+(cl:in-package #:climacs-commands)
 
 (define-command (com-not-modified :name t :command-table buffer-table) ()
   "Clear the modified flag for the current buffer.

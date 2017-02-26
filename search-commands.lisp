@@ -26,7 +26,7 @@
 
 ;;; Search commands for Climacs.
 
-(in-package :climacs-commands)
+(cl:in-package #:climacs-commands)
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; 

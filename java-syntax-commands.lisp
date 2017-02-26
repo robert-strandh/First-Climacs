@@ -28,7 +28,7 @@
 
 ;;; Commands specific to the Java syntax for Climacs.
 
-(in-package :climacs-java-syntax)
+(cl:in-package #:climacs-java-syntax)
 
 ;;; This command table is used when Drei runs as a pane.
 (make-command-table 'pane-java-table

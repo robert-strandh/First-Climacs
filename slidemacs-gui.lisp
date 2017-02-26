@@ -18,7 +18,7 @@
 ;;; Free Software Foundation, Inc., 59 Temple Place - Suite 330,
 ;;; Boston, MA  02111-1307  USA.
 
-(in-package :climacs-slidemacs-editor)
+(cl:in-package #:climacs-slidemacs-editor)
 
 ;;; Share the same package to make it easy to reuse the parser
 

@@ -1,7 +1,7 @@
 ;;; remove this file whenever CLX is fixed and McCLIM removes its private
 ;;; implementation of translate.
 
-(in-package :clim-clx)
+(cl:in-package #:clim-clx)
 
 (defun translate (src src-start src-end afont dst dst-start)
   (let ((min-char-index (xlib:font-min-char afont))

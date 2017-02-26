@@ -22,7 +22,7 @@
   (:use :clim-lisp :clim :clim-extensions :drei-buffer :drei-base 
 	:drei-syntax :flexichain :drei :drei-fundamental-syntax)
   (:export))
-(in-package :climacs-ttcn3-syntax)
+(cl:in-package #:climacs-ttcn3-syntax)
 
 (defgeneric display-parse-tree (parse-symbol pane drei syntax))
 

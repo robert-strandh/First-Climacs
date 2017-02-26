@@ -20,7 +20,7 @@
 
 ;;; Input/Output of buffers to and from streams.
 
-(in-package :climacs-core)
+(cl:in-package #:climacs-core)
 
 (define-condition buffer-contains-noncharacter (buffer-writing-error)
   ()

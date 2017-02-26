@@ -22,7 +22,7 @@
 ;;; typeout overlays, that are highly ephemeral and temporary
 ;;; creations to be used for short-lived interaction.
 
-(in-package :climacs1-gui)
+(cl:in-package #:climacs1-gui)
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;

@@ -21,7 +21,7 @@
 
 ;;; Syntax for analysing Common Lisp
 
-(in-package :climacs-cl-syntax)
+(cl:in-package #:climacs-cl-syntax)
 
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;

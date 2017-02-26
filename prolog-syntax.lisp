@@ -19,7 +19,7 @@
 
 ;;; Syntax for analysing ISO Prolog
 
-(in-package #:climacs-prolog-syntax)
+(cl:in-package #:climacs-prolog-syntax)
 
 (defclass prolog-parse-tree (parse-tree)
   ())

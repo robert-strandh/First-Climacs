@@ -26,7 +26,7 @@
 
 ;;; Entry points for the Climacs editor.
 
-(in-package :climacs)
+(cl:in-package #:climacs)
 
 (defun find-climacs-frame ()
   (let ((frame-manager (clim:find-frame-manager)))

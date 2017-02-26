@@ -22,7 +22,7 @@
 
 ;;; Package definitions for the Climacs editor.
 
-(in-package :cl-user)
+(cl:in-package #:cl-user)
 
 (defpackage :climacs1-gui
     (:use :clim-lisp :clim :drei-buffer :drei-base

@@ -26,7 +26,7 @@
 
 ;;; Commands specific to the Lisp syntax for Climacs.
 
-(in-package :drei-lisp-syntax)
+(cl:in-package #:drei-lisp-syntax)
 
 (make-command-table 'climacs-lisp-table
                     :errorp nil)
