@@ -68,13 +68,19 @@ character literal with #\(."
          (drei-buffer:insert-sequence (point) "#\\("))
         (t
          (when (and (not (zerop n))
-                    (forward-expression (point) (drei:current-syntax) 1 nil))
-           (backward-expression (point) (drei:current-syntax) 1 nil))
+                    (drei-motion:forward-expression
+                     (point)
+                     (drei:current-syntax) 1 nil))
+           (drei-motion:backward-expression
+            (point)
+            (drei:current-syntax) 1 nil))
          (insert-character #\()
-         (forward-expression (point) (drei:current-syntax) n nil)
+         (drei-motion:forward-expression (point) (drei:current-syntax) n nil)
          (insert-character #\))
          (drei-buffer:backward-object (point))
-         (backward-expression (point) (drei:current-syntax) n nil))))
+         (drei-motion:backward-expression
+          (point)
+          (drei:current-syntax) n nil))))
 
 (define-command (com-wrap-expression :name t :command-table structedit-table)
     ((n 'integer :default 1))
@@ -97,7 +103,7 @@ preserving structural validity."
                       (form-around (drei:current-syntax)
                                    (drei-buffer:offset (point))))
          (drei-buffer:insert-sequence (point) "#\\)"))
-        ((forward-up (point) (drei:current-syntax) 1 nil)
+        ((drei-motion:forward-up (point) (drei:current-syntax) 1 nil)
          (drei-buffer:insert-object (point) #\Newline)
          (indent-current-line (drei:current-view) (point)))))
 
@@ -192,11 +198,13 @@ If in a character literal, replace the character literal with #\\\"."
          (drei-buffer:insert-sequence (point) "#\\\""))
         (t
          (let ((old-offset (drei-buffer:offset (point))))
-           (forward-expression (point) (drei:current-syntax) n nil)
+           (drei-motion:forward-expression (point) (drei:current-syntax) n nil)
            (drei-buffer:insert-buffer-object (esa:current-buffer) old-offset #\")
            (insert-character #\")
            (drei-buffer:backward-object (point))
-           (backward-expression (point) (drei:current-syntax) (min 1 n) nil)))))
+           (drei-motion:backward-expression
+            (point)
+            (drei:current-syntax) (min 1 n) nil)))))
 
 (define-command (com-wrap-expression-in-doublequote :name t :command-table structedit-table)
     ((n 'integer :default 1))
