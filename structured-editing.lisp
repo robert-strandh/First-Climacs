@@ -61,7 +61,8 @@ character literal with #\(."
         ((in-comment-p (current-syntax) (point))
          (insert-character #\())
         ((in-character-p (current-syntax) (point))
-         (delete-form (current-buffer) (form-around (current-syntax) (offset (point))))
+         (delete-form (esa:current-buffer)
+                      (form-around (current-syntax) (offset (point))))
          (insert-sequence (point) "#\\("))
         (t
          (when (and (not (zerop n))
@@ -90,7 +91,8 @@ preserving structural validity."
              (in-comment-p (current-syntax) (point)))
          (insert-character #\)))
         ((in-character-p (current-syntax) (point))
-         (delete-form (current-buffer) (form-around (current-syntax) (offset (point))))
+         (delete-form (esa:current-buffer)
+                      (form-around (current-syntax) (offset (point))))
          (insert-sequence (point) "#\\)"))
         ((forward-up (point) (current-syntax) 1 nil)
          (insert-object (point) #\Newline)
@@ -121,11 +123,13 @@ of a structural object."
                           (null (form-children list-at-mark)))
                      (and string-at-mark
                           (= (size string-at-mark) 2)))
-             (delete-form (current-buffer) form-around)))
+             (delete-form (esa:current-buffer)
+                          form-around)))
           ((and (form-character-p immediate-form)
                 (= (funcall border-offset-fn immediate-form)
                    (offset (point))))
-           (delete-form (current-buffer) immediate-form))
+           (delete-form (esa:current-buffer)
+                        immediate-form))
           (t (funcall delete-fn (point))))))
 
 (define-command (com-forward-delete-object-structurally
@@ -175,12 +179,13 @@ If in a character literal, replace the character literal with #\\\"."
         ((in-string-p (current-syntax) (point))
          (insert-sequence (point) "\\\""))
         ((in-character-p (current-syntax) (point))
-         (delete-form (current-buffer) (form-around (current-syntax) (offset (point))))
+         (delete-form (esa:current-buffer)
+                      (form-around (current-syntax) (offset (point))))
          (insert-sequence (point) "#\\\""))
         (t
          (let ((old-offset (offset (point))))
            (forward-expression (point) (current-syntax) n nil)
-           (insert-buffer-object (current-buffer) old-offset #\")
+           (insert-buffer-object (esa:current-buffer) old-offset #\")
            (insert-character #\")
            (backward-object (point))
            (backward-expression (point) (current-syntax) (min 1 n) nil)))))
@@ -204,15 +209,19 @@ backward in the current list before splicing all S-expressions
 forward into the enclosing list."
   (let ((list (list-at-mark (current-syntax) (point))))
     (when list
-      (let ((begin-mark (make-buffer-mark (current-buffer) (start-offset list)))
-            (end-mark (make-buffer-mark (current-buffer) (end-offset list))))
+      (let ((begin-mark (make-buffer-mark (esa:current-buffer)
+                                          (start-offset list)))
+            (end-mark (make-buffer-mark (esa:current-buffer)
+                                        (end-offset list))))
         (when kill-backward
           (loop until (eq (list-at-mark (current-syntax) (offset (point)))
                           (or (form-before (current-syntax) (offset (point)))
                               (form-around (current-syntax) (offset (point)))))
              do (backward-delete-expression (point) (current-syntax) 1 nil)))
-        (delete-buffer-range (current-buffer) (offset begin-mark) 1)
-        (delete-buffer-range (current-buffer) (1- (offset end-mark)) 1)))))
+        (delete-buffer-range (esa:current-buffer)
+                             (offset begin-mark) 1)
+        (delete-buffer-range (esa:current-buffer)
+                             (1- (offset end-mark)) 1)))))
 
 (define-command (com-kill-line-structurally :name t :command-table structedit-table)
     ()
@@ -228,7 +237,8 @@ after the point."
     (cond ((empty-line-p (point))
            (forward-delete-object (point)))
           ((in-string-p (current-syntax) (point))
-           (if (= (buffer-line-number (current-buffer) (end-offset form-around))
+           (if (= (buffer-line-number (esa:current-buffer)
+                                      (end-offset form-around))
                   (line-number (point)))
                ;; Delete from point until the end of the string, but
                ;; keep the ending delimiter.
@@ -239,7 +249,8 @@ after the point."
            ;; Delete until end of line
            (kill-region (point) (end-of-line (clone-mark (point)))))
           ((in-long-comment-p (current-syntax) (point))
-           (if (= (buffer-line-number (current-buffer) (end-offset comment))
+           (if (= (buffer-line-number (esa:current-buffer)
+                                      (end-offset comment))
                   (line-number (point)))
                ;; End of comment on same line as point, if a complete
                ;; long comment, don't delete the ending delimiter
@@ -249,48 +260,59 @@ after the point."
                ;; Delete from point until end of line.
                (kill-region (point) (end-of-line (clone-mark (point))))))
           ((and form-after
-                (= (buffer-line-number (current-buffer) (start-offset form-after))
+                (= (buffer-line-number (esa:current-buffer)
+                                       (start-offset form-after))
                    (line-number (point))))
            (forward-kill-expression (point) (current-syntax))
            (loop for form-after = (form-after (current-syntax) (offset (point)))
                  while (and form-after
-                            (= (buffer-line-number (current-buffer) (start-offset form-after))
+                            (= (buffer-line-number (esa:current-buffer)
+                                                   (start-offset form-after))
                                (line-number (point))))
                  do (forward-kill-expression (point) (current-syntax) 1 t)))
           (t (forward-kill-line (point) (current-syntax) 1 t nil)))))
 
-(set-key `(com-open-list ,*numeric-argument-marker* ,*numeric-argument-marker*)
-         'structedit-table
-         '(#\())
+(esa:set-key
+ `(com-open-list ,*numeric-argument-marker* ,*numeric-argument-marker*)
+ 'structedit-table
+ '(#\())
 
-(set-key `(com-wrap-expression ,*numeric-argument-marker*)
-         'structedit-table
-         '((#\( :meta)))
+(esa:set-key
+ `(com-wrap-expression ,*numeric-argument-marker*)
+ 'structedit-table
+ '((#\( :meta)))
 
-(set-key 'com-close-list-and-newline
-         'structedit-table
-         '(#\)))
+(esa:set-key
+ 'com-close-list-and-newline
+ 'structedit-table
+ '(#\)))
 
-(set-key `(com-forward-delete-object-structurally ,*numeric-argument-marker*)
-         'structedit-table
-         '((#\d :control)))
+(esa:set-key
+ `(com-forward-delete-object-structurally ,*numeric-argument-marker*)
+ 'structedit-table
+ '((#\d :control)))
 
-(set-key `(com-backward-delete-object-structurally ,*numeric-argument-marker*)
-         'structedit-table
-         '((#\Backspace)))
+(esa:set-key
+ `(com-backward-delete-object-structurally ,*numeric-argument-marker*)
+ 'structedit-table
+ '((#\Backspace)))
 
-(set-key `(com-insert-double-quote-structurally ,*numeric-argument-marker*)
-         'structedit-table
-         '((#\")))
+(esa:set-key
+ `(com-insert-double-quote-structurally ,*numeric-argument-marker*)
+ 'structedit-table
+ '((#\")))
 
-(set-key `(com-wrap-expression-in-doublequote ,*numeric-argument-marker*)
-         'structedit-table
-         '((#\" :meta)))
+(esa:set-key
+ `(com-wrap-expression-in-doublequote ,*numeric-argument-marker*)
+ 'structedit-table
+ '((#\" :meta)))
 
-(set-key `(com-splice-list ,*numeric-argument-marker*)
-         'structedit-table
-         '((#\s :meta)))
+(esa:set-key
+ `(com-splice-list ,*numeric-argument-marker*)
+ 'structedit-table
+ '((#\s :meta)))
 
-(set-key 'com-kill-line-structurally
-         'structedit-table
-         '((#\k :control)))
+(esa:set-key
+ 'com-kill-line-structurally
+ 'structedit-table
+ '((#\k :control)))
