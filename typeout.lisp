@@ -60,7 +60,7 @@ record history."))
         (last-cursor-position view) nil)
   (clear-redisplay-information view)
   ;; If it's on display, clear the window too.
-  (let ((window (find view (windows *application-frame*)
+  (let ((window (find view (esa:windows *application-frame*)
                  :key #'view)))
     (when window (window-clear window))))
 
@@ -142,7 +142,7 @@ stream meant for typeout. `Climacs' is the Climacs instance in
 which the typeout pane should be shown, and `label' is the name
 of the created typeout view. Returns NIL."
   (let* ((typeout-view (ensure-typeout-view climacs label erase))
-         (pane-with-typeout-view (or (find typeout-view (windows climacs)
+         (pane-with-typeout-view (or (find typeout-view (esa:windows climacs)
                                       :key #'view)
                                      (let ((pane (split-window t)))
                                        (setf (view pane) typeout-view)
@@ -165,7 +165,7 @@ of the created typeout view. Returns NIL."
 used for typeout. `Label' is the name of the created typeout
 view. If `erase' is true, clear the contents of any existing
 typeout view with that name."
-  `(invoke-with-typeout-view *esa-instance* ,label ,erase
+  `(invoke-with-typeout-view esa:*esa-instance* ,label ,erase
                              #'(lambda (,stream)
                                  ,@body)))
 
@@ -310,7 +310,7 @@ overlay."
       (unless (null (sheet-parent pane))
         (pane-overlayer (sheet-parent pane)))))
 
-(defun add-typeout (&optional (pane (current-window)))
+(defun add-typeout (&optional (pane (esa:current-window)))
   "Return the typeout overlay of `pane', creating one if it
 doesn't exist."
   (with-look-and-feel-realization
@@ -324,7 +324,7 @@ doesn't exist."
                                    ; the parent of `overlay'.
             (setf (overlay-pane overlayer) overlay))))))
 
-(defun remove-typeout (&optional (pane (current-window)))
+(defun remove-typeout (&optional (pane (esa:current-window)))
   "Remove the typeout overlay of `pane', defaulting to the
 current window."
   (setf (overlay-pane (pane-overlayer pane)) nil))
@@ -348,8 +348,9 @@ be newly created, and any old overlay will have been deleted."
         (remove-typeout pane)
         (values-list values)))))
 
-(defmacro with-typeout ((stream &rest args &key erase (window (current-window)))
-                        &body body)
+(defmacro with-typeout
+    ((stream &rest args &key erase (window (esa:current-window)))
+     &body body)
   "Evaluate `body' with `stream' bound to a typeout overlay for
 `window'. If `erase' is true, the typeout overlay will be newly
 created, and any old overlay will have been deleted."
@@ -438,13 +439,15 @@ is the frame manager."
 (defmethod frame-manager-menu-choose
     ((frame-manager climacs-frame-manager) items
      &rest options
-     &key (associated-window (current-window)) printer presentation-type
-     (default-item nil default-item-p)
-     text-style label cache unique-id id-test cache-value cache-test
-     max-width max-height n-rows n-columns x-spacing y-spacing row-wise
-     cell-align-x cell-align-y (scroll-bars :vertical)
+     &key (associated-window (esa:current-window))
+       printer
+       presentation-type
+       (default-item nil default-item-p)
+       text-style label cache unique-id id-test cache-value cache-test
+       max-width max-height n-rows n-columns x-spacing y-spacing row-wise
+       cell-align-x cell-align-y (scroll-bars :vertical)
      ;; We provide pointer documentation by default.
-     (pointer-documentation *pointer-documentation-output*))
+       (pointer-documentation *pointer-documentation-output*))
   (flet ((drawer (overlay type)
            (let* ((height (bounding-rectangle-height
                            (with-new-output-record (overlay)
