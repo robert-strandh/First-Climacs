@@ -48,7 +48,7 @@
 (defun delete-form (buffer form)
   "Delete `form' from `buffer'."
   (drei-buffer:delete-buffer-range
-   buffer (start-offset form) (drei-buffer:size form)))
+   buffer (drei-syntax:start-offset form) (drei-buffer:size form)))
 
 (clim:define-command
     (com-open-list :name t :command-table structedit-table)
@@ -160,7 +160,8 @@ forward, without regard for delimiter balancing."
       (drei-editing:forward-delete-object (drei:point))
       (delete-object-structurally #'drei-editing:forward-delete-object
                                   #'drei-buffer:forward-object
-                                  #'form-after #'start-offset
+                                  #'form-after
+                                  #'drei-syntax:start-offset
                                   #'location-at-end-of-form)))
 
 (clim:define-command
@@ -177,7 +178,8 @@ character backward, without regard for delimiter balancing."
       (drei-editing:backward-delete-object (drei:point))
       (delete-object-structurally #'drei-editing:backward-delete-object
                                   #'drei-buffer:backward-object
-                                  #'form-before #'end-offset
+                                  #'form-before
+                                  #'drei-syntax:end-offset
                                   #'location-at-beginning-of-form)))
 
 (clim:define-command
@@ -221,7 +223,8 @@ no prefix argument is specified, the default is to wrap one
 S-expression, however, not zero."
   (if (in-string-p (drei:current-syntax) (drei:point))
       (setf (drei-buffer:offset (drei:point))
-            (1+ (end-offset (form-around (drei:current-syntax) (drei:point)))))
+            (1+ (drei-syntax:end-offset
+                 (form-around (drei:current-syntax) (drei:point)))))
       (com-insert-double-quote-structurally n)))
 
 (clim:define-command
@@ -233,10 +236,12 @@ backward in the current list before splicing all S-expressions
 forward into the enclosing list."
   (let ((list (list-at-mark (drei:current-syntax) (drei:point))))
     (when list
-      (let ((begin-mark (drei-buffer:make-buffer-mark (esa:current-buffer)
-                                                      (start-offset list)))
-            (end-mark (drei-buffer:make-buffer-mark (esa:current-buffer)
-                                                    (end-offset list))))
+      (let ((begin-mark (drei-buffer:make-buffer-mark
+                         (esa:current-buffer)
+                         (drei-syntax:start-offset list)))
+            (end-mark (drei-buffer:make-buffer-mark
+                       (esa:current-buffer)
+                       (drei-syntax:end-offset list))))
         (when kill-backward
           (loop until (eq (list-at-mark (drei:current-syntax)
                                         (drei-buffer:offset (drei:point)))
@@ -273,11 +278,13 @@ after the point."
           ((in-string-p (drei:current-syntax) (drei:point))
            (if (= (drei-buffer:buffer-line-number
                    (esa:current-buffer)
-                   (end-offset form-around))
+                   (drei-syntax:end-offset form-around))
                   (drei-buffer:line-number (drei:point)))
                ;; Delete from point until the end of the string, but
                ;; keep the ending delimiter.
-               (drei-base:kill-region (drei:point) (1- (end-offset form-around)))
+               (drei-base:kill-region
+                (drei:point)
+                (1- (drei-syntax:end-offset form-around)))
                ;; Delete from point until end of line.
                (drei-base:kill-region
                 (drei:point)
@@ -290,12 +297,12 @@ after the point."
           ((in-long-comment-p (drei:current-syntax) (drei:point))
            (if (= (drei-buffer:buffer-line-number
                    (esa:current-buffer)
-                   (end-offset comment))
+                   (drei-syntax:end-offset comment))
                   (drei-buffer:line-number (drei:point)))
                ;; End of comment on same line as point, if a complete
                ;; long comment, don't delete the ending delimiter
                (drei-base:kill-region (drei:point)
-                                      (- (end-offset comment)
+                                      (- (drei-syntax:end-offset comment)
                                          (if (form-complete-p comment)
                                              2 0)))
                ;; Delete from point until end of line.
@@ -305,7 +312,7 @@ after the point."
           ((and form-after
                 (= (drei-buffer:buffer-line-number
                     (esa:current-buffer)
-                    (start-offset form-after))
+                    (drei-syntax:start-offset form-after))
                    (drei-buffer:line-number (drei:point))))
            (drei-editing:forward-kill-expression
             (drei:point)
@@ -315,7 +322,7 @@ after the point."
                  while (and form-after
                             (= (drei-buffer:buffer-line-number
                                 (esa:current-buffer)
-                                (start-offset form-after))
+                                (drei-syntax:start-offset form-after))
                                (drei-buffer:line-number (drei:point))))
                  do (drei-editing:forward-kill-expression
                      (drei:point)
