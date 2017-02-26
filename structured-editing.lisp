@@ -147,8 +147,8 @@ delete unless the S-expression is empty, in which case delete the
 whole S-expression. If `force' is true, simply delete a character
 forward, without regard for delimiter balancing."
   (if force
-      (forward-delete-object (point))
-      (delete-object-structurally #'forward-delete-object
+      (drei-editing:forward-delete-object (point))
+      (delete-object-structurally #'drei-editing:forward-delete-object
                                   #'drei-buffer:forward-object
                                   #'form-after #'start-offset
                                   #'location-at-end-of-form)))
@@ -163,8 +163,8 @@ delete unless the S-expression is empty, in which case delete the
 whole S-expression. If `force' is true, simply delete a
 character backward, without regard for delimiter balancing."
   (if force
-      (backward-delete-object (point))
-      (delete-object-structurally #'backward-delete-object
+      (drei-editing:backward-delete-object (point))
+      (delete-object-structurally #'drei-editing:backward-delete-object
                                   #'drei-buffer:backward-object
                                   #'form-before #'end-offset
                                   #'location-at-beginning-of-form)))
@@ -228,7 +228,9 @@ forward into the enclosing list."
                                            (drei-buffer:offset (point)))
                               (form-around (drei:current-syntax)
                                            (drei-buffer:offset (point)))))
-             do (backward-delete-expression (point) (drei:current-syntax) 1 nil)))
+             do (drei-editing:backward-delete-expression
+                 (point)
+                 (drei:current-syntax) 1 nil)))
         (drei-buffer:delete-buffer-range
          (esa:current-buffer)
          (drei-buffer:offset begin-mark) 1)
@@ -250,7 +252,7 @@ after the point."
                                 (drei-buffer:offset (point))))
         (comment (comment-at-mark (drei:current-syntax) (point))))
     (cond ((drei-base:empty-line-p (point))
-           (forward-delete-object (point)))
+           (drei-editing:forward-delete-object (point)))
           ((in-string-p (drei:current-syntax) (point))
            (if (= (drei-buffer:buffer-line-number
                    (esa:current-buffer)
@@ -288,7 +290,9 @@ after the point."
                     (esa:current-buffer)
                     (start-offset form-after))
                    (drei-buffer:line-number (point))))
-           (forward-kill-expression (point) (drei:current-syntax))
+           (drei-editing:forward-kill-expression
+            (point)
+            (drei:current-syntax))
            (loop for form-after = (form-after (drei:current-syntax)
                                               (drei-buffer:offset (point)))
                  while (and form-after
@@ -296,8 +300,12 @@ after the point."
                                 (esa:current-buffer)
                                 (start-offset form-after))
                                (drei-buffer:line-number (point))))
-                 do (forward-kill-expression (point) (drei:current-syntax) 1 t)))
-          (t (forward-kill-line (point) (drei:current-syntax) 1 t nil)))))
+                 do (drei-editing:forward-kill-expression
+                     (point)
+                     (drei:current-syntax) 1 t)))
+          (t (drei-editing:forward-kill-line
+              (point)
+              (drei:current-syntax) 1 t nil)))))
 
 (esa:set-key
  `(com-open-list ,*numeric-argument-marker* ,*numeric-argument-marker*)
