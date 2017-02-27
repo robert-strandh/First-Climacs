@@ -44,28 +44,30 @@ files.")
   "A function for creating targets for commands potentially
 acting over multiple views.")
 
-(defvar *climacs-text-style* (make-text-style :fix nil nil)
+(defvar *climacs-text-style* (clim:make-text-style :fix nil nil)
   "The default CLIM text style used in Climacs panes.")
 
-(defclass climacs-buffer (drei-buffer)
+(defclass climacs-buffer (drei:drei-buffer)
   ((%external-format :initform *default-external-format*
                      :accessor external-format
                      :documentation "The external format that was
 used when reading the source destination of the buffer
 contents.")))
 
-(defclass climacs-pane (drei-pane esa-pane-mixin)
+(defclass climacs-pane (drei:drei-pane esa:esa-pane-mixin)
   ()
-  (:metaclass modual-class)
+  (:metaclass esa-utils:modual-class)
   (:default-initargs
-   :view (make-instance 'textual-drei-syntax-view
+   :view (make-instance 'drei:textual-drei-syntax-view
           :buffer (make-instance 'climacs-buffer))
    :display-time :command-loop
    :text-style *climacs-text-style*
    :width 900 :height 400))
 
-(defmethod command-table ((pane climacs-pane))
-  (command-table (pane-frame pane)))
+;;; FIXME: COMMAND-TABLE is not exported from ESA so we currently need
+;;; two package markers.
+(defmethod esa::command-table ((pane climacs-pane))
+  (esa::command-table (clim:pane-frame pane)))
 
 (define-condition view-setting-error (error)
   ((%view :accessor view
@@ -98,21 +100,21 @@ Climacs instance the window belongs to."))
 attempted to be set to a view already on display in some other
 window"))
 
-(defmethod (setf view) :around ((view drei-view) (pane climacs-pane))
+(defmethod (setf drei::view) :around ((view drei:drei-view) (pane climacs-pane))
   (let ((window-displaying-view
          (find-if #'(lambda (other-pane)
                       (and (not (eq other-pane pane))
                            (typep other-pane 'climacs-pane)
-                           (eq (view other-pane) view)))
-                  (windows (pane-frame pane))))
-        (old-view-active (active (view pane))))
+                           (eq (drei::view other-pane) view)))
+                  (esa:windows (clim:pane-frame pane))))
+        (old-view-active (drei:active (drei::view pane))))
     (prog1
-        (cond ((not (member view (views (pane-frame pane))))
+        (cond ((not (member view (drei-core:views (clim:pane-frame pane))))
                (restart-case (error 'unknown-view :view view)
                  (add-to-view-list ()
                   :report "Add the view object to Climacs"
-                  (push view (views (pane-frame pane)))
-                  (setf (view pane) view))))
+                  (push view (drei-core:views (clim:pane-frame pane)))
+                  (setf (drei::view pane) view))))
               (window-displaying-view
                (restart-case
                    (error 'view-already-displayed :view view :window window-displaying-view)
@@ -123,29 +125,30 @@ window"))
                  (remove-other-use ()
                   :report "Make the other window try to display some other view"
                   (setf (view window-displaying-view) (any-preferably-undisplayed-view))
-                  (setf (view pane) view))
+                  (setf (drei::view pane) view))
                  (remove-other-pane ()
                   :report "Remove the other window displaying the view"
                   (delete-window window-displaying-view)
-                  (setf (view pane) view))
+                  (setf (drei::view pane) view))
                  (clone-view ()
                   :report "Make a clone of the view and use that instead"
-                  (setf (view pane) (clone-view-for-climacs
-                                     (pane-frame window-displaying-view) view)))
+                  (setf (drei::view pane) (clone-view-for-climacs
+                                          (clim:pane-frame window-displaying-view)
+                                          view)))
                  (cancel ()
                   :report "Cancel the setting of the windows view and just return nil")))
               (t (call-next-method)))
       ;; Move view to the front of the view-list, doesn't carry
       ;; semantic significance, but makes view-switching more
       ;; convenient.
-      (setf (views (pane-frame pane))
-            (cons view (delete view (views (pane-frame pane)))))
+      (setf (drei-core:views (clim:pane-frame pane))
+            (cons view (delete view (drei-core:views (clim:pane-frame pane)))))
       (when old-view-active
-        (ensure-only-view-active (pane-frame pane) view)))))
+        (ensure-only-view-active (clim:pane-frame pane) view)))))
 
-(defmethod (setf view) :before ((view drei-view) (pane climacs-pane))
-  (with-accessors ((views views)) (pane-frame pane)
-    (full-redisplay pane)))
+(defmethod (setf drei::view) :before ((view drei:drei-view) (pane climacs-pane))
+  ;;  (with-accessors ((views views)) (pane-frame pane)
+    (drei:full-redisplay pane)) ;)
 
 (defgeneric buffer-pane-p (pane)
   (:documentation "Returns T when a pane contains a buffer."))
@@ -155,17 +158,17 @@ window"))
   nil)
 
 (defmethod buffer-pane-p ((pane climacs-pane))
-  (typep (view pane) 'drei-buffer-view))
+  (typep (clim:view pane) 'drei:drei-buffer-view))
 
-(defmethod in-focus-p ((pane climacs-pane))
-  (eq pane (first (windows *application-frame*))))
+(defmethod drei:in-focus-p ((pane climacs-pane))
+  (eq pane (first (esa:windows clim:*application-frame*))))
 
-(defvar *info-bg-color* +gray85+)
-(defvar *info-fg-color* +black+)
-(defvar *mini-bg-color* +white+)
-(defvar *mini-fg-color* +black+)
+(defvar *info-bg-color* clim:+gray85+)
+(defvar *info-fg-color* clim:+black+)
+(defvar *mini-bg-color* clim:+white+)
+(defvar *mini-fg-color* clim:+black+)
 
-(defclass climacs-info-pane (info-pane)
+(defclass climacs-info-pane (esa:info-pane)
   ()
   (:default-initargs
       :height 20 :max-height 20 :min-height 20
@@ -175,10 +178,10 @@ window"))
       :foreground *info-fg-color*
       :width 900))
 
-(defclass climacs-minibuffer-pane (minibuffer-pane)
+(defclass climacs-minibuffer-pane (esa:minibuffer-pane)
   ()
   (:default-initargs
-   :default-view +textual-view+
+   :default-view clim:+textual-view+
    :background *mini-bg-color*
    :foreground *mini-fg-color*
    :width 900))
@@ -195,165 +198,167 @@ window"))
 ;;; based on the current window and view.
 
 ;;; Basic functionality
-(make-command-table 'base-table :errorp nil)
+(clim:make-command-table 'base-table :errorp nil)
 ;;; Buffers
-(make-command-table 'buffer-table :errorp nil)
+(clim:make-command-table 'buffer-table :errorp nil)
 ;;; Commands used for climacs development
-(make-command-table 'development-table :errorp nil)
+(clim:make-command-table 'development-table :errorp nil)
 ;;; Windows
-(make-command-table 'window-table :errorp nil)
+(clim:make-command-table 'window-table :errorp nil)
 
 ;;; customization of help.  FIXME: this might be better done by having
 ;;; the functions that the ESA commands call be customizeable generic
 ;;; functions; however, while they're not, scribbling over the ESA
 ;;; command tables is a bad thing.
-(make-command-table 'climacs-help-table :inherit-from '(help-table)
+(clim:make-command-table 'climacs-help-table :inherit-from '(esa:help-table)
                     :errorp nil)
 
-(make-command-table 'global-climacs-table
+(clim:make-command-table 'global-climacs-table
                     :errorp nil
                     :inherit-from '(base-table
                                     buffer-table
                                     window-table
                                     development-table
                                     climacs-help-table
-                                    global-esa-table
-                                    esa-io-table))
+                                    esa:global-esa-table
+                                    esa-io:esa-io-table))
 
 ;; This command table is what assembles the various other command
 ;; tables for the commands actually accessible by the user.
-(defclass climacs-command-table (standard-command-table)
+(defclass climacs-command-table (clim:standard-command-table)
   ())
 
-(defmethod command-table-inherit-from ((table climacs-command-table))
-  (append (view-command-tables (current-view))
+(defmethod clim:command-table-inherit-from ((table climacs-command-table))
+  (append (drei:view-command-tables (drei:current-view))
           '(global-climacs-table)
-          (when (use-editor-commands-p (current-view))
-            '(editor-table))
+          (when (drei:use-editor-commands-p (drei:current-view))
+            '(drei:editor-table))
           (call-next-method)))
 
 ;; This is the actual command table that will be used for Climacs.
-(make-command-table 'climacs-global-table
+(clim:make-command-table 'climacs-global-table
  :inherit-from (list (make-instance 'climacs-command-table
                       :name 'climacs-dispatching-table))
- :menu `(("File" :menu esa-io-menu-table)
-         ("Macros" :menu keyboard-macro-menu-table)
+ :menu `(("File" :menu esa-io:esa-io-menu-table)
+         ("Macros" :menu esa:keyboard-macro-menu-table)
          ("Windows" :menu window-menu-table)
-         ("Help" :menu help-menu-table))
+         ("Help" :menu esa:help-menu-table))
  :errorp nil)
 
-(define-application-frame climacs (esa-frame-mixin
-				   standard-application-frame)
-  ((%views :initform '() :accessor views)
+(clim:define-application-frame climacs (esa:esa-frame-mixin
+                                        clim:standard-application-frame)
+  ((%views :initform '() :accessor drei-core:views)
    (%groups :initform (make-hash-table :test #'equal) :accessor groups)
    (%active-group :initform nil :accessor active-group)
-   (%command-table :initform (find-command-table 'climacs-global-table)
-                   :accessor find-applicable-command-table
-                   :accessor frame-command-table)
+   (%command-table :initform (clim:find-command-table 'climacs-global-table)
+                   :accessor esa:find-applicable-command-table
+                   :accessor clim:frame-command-table)
    (%output-stream :accessor output-stream
                    :initform nil
                    :initarg :output-stream))
   (:menu-bar climacs-global-table)
   (:panes
    (climacs-window
-    (let* ((*esa-instance* *application-frame*)
-           (climacs-pane (make-pane 'climacs-pane :active t))
-	   (info-pane (make-pane 'climacs-info-pane
+    (let* ((esa:*esa-instance* clim:*application-frame*)
+           (climacs-pane (clim:make-pane 'climacs-pane :active t))
+	   (esa:info-pane (clim:make-pane 'climacs-info-pane
                        :master-pane climacs-pane)))
-      (unless (output-stream *esa-instance*)
-        (setf (output-stream *esa-instance*)
-              (make-typeout-stream *application-frame* "*standard-output*")))
-      (setf (windows *application-frame*) (list climacs-pane)
-	    (views *application-frame*) (list (view climacs-pane)))
-      (vertically ()
+      (unless (output-stream esa:*esa-instance*)
+        (setf (output-stream esa:*esa-instance*)
+              (make-typeout-stream clim:*application-frame* "*standard-output*")))
+      (setf (esa:windows clim:*application-frame*)
+            (list climacs-pane)
+	    (drei-core:views clim:*application-frame*)
+            (list (drei::view climacs-pane)))
+      (clim:vertically ()
         (if *with-scrollbars*
-            (scrolling ()
+            (clim:scrolling ()
               climacs-pane)
             climacs-pane)
-        info-pane)))
-   (minibuffer (make-pane 'climacs-minibuffer-pane)))
+        esa:info-pane)))
+   (minibuffer (clim:make-pane 'climacs-minibuffer-pane)))
   (:layouts
    (default
        (overlaying ()
-         (vertically (:scroll-bars nil)
+         (clim:vertically (:scroll-bars nil)
            climacs-window
            minibuffer))))
   (:top-level ((lambda (frame)
-                 (with-frame-manager ((make-instance 'climacs-frame-manager))
-                   (esa-top-level frame :prompt "M-x "))))))
+                 (clim:with-frame-manager ((make-instance 'climacs-frame-manager))
+                   (esa:esa-top-level frame :prompt "M-x "))))))
 
-(define-esa-top-level ((frame climacs) command-parser
+(esa:define-esa-top-level ((frame climacs) command-parser
                        command-unparser
                        partial-command-parser
                        prompt)
- :bindings ((*default-target-creator* *climacs-target-creator*)
-            (*previous-command* (previous-command (drei-instance)))
+ :bindings ((drei-core:*default-target-creator* *climacs-target-creator*)
+            (esa:*previous-command* (esa:previous-command (drei:drei-instance)))
             (*standard-output* (or (output-stream frame)
                                    *terminal-io*))))
 
-(defmethod frame-standard-input ((frame climacs))
-  (get-frame-pane frame 'minibuffer))
+(defmethod clim:frame-standard-input ((frame climacs))
+  (clim:get-frame-pane frame 'esa:minibuffer))
 
-(defmethod buffers ((climacs climacs))
+(defmethod esa:buffers ((climacs climacs))
   (remove-duplicates
-   (mapcar #'buffer (remove-if-not
+   (mapcar #'esa-io:buffer (remove-if-not
                      #'(lambda (view)
-                         (typep view 'drei-buffer-view))
-                     (views climacs)))))
+                         (typep view 'drei:drei-buffer-view))
+                     (drei-core:views climacs)))))
 
-(defmethod esa-current-buffer ((application-frame climacs))
-  (when (buffer-pane-p (esa-current-window application-frame))
-    (buffer (current-view (esa-current-window application-frame)))))
+(defmethod esa:esa-current-buffer ((application-frame climacs))
+  (when (buffer-pane-p (esa:esa-current-window application-frame))
+    (esa-io:buffer (drei:current-view (esa:esa-current-window application-frame)))))
 
-(defmethod (setf esa-current-buffer) ((new-buffer climacs-buffer)
-                                      (application-frame climacs))
-  (setf (buffer (current-view (esa-current-window application-frame)))
+(defmethod (setf esa:esa-current-buffer) ((new-buffer climacs-buffer)
+                                          (application-frame climacs))
+  (setf (esa-io:buffer (drei:current-view (esa:esa-current-window application-frame)))
         new-buffer))
 
-(defmethod drei-instance-of ((frame climacs))
-  (esa-current-window frame))
+(defmethod drei:drei-instance-of ((frame climacs))
+  (esa:esa-current-window frame))
 
-(defmethod (setf windows) :after (new-val (climacs climacs))
+(defmethod (setf esa:windows) :after (new-val (climacs climacs))
   ;; Ensures that we don't end up with two views that both believe
   ;; they are active.
-  (activate-window (esa-current-window climacs)))
+  (activate-window (esa:esa-current-window climacs)))
 
 (defun current-window-p (window)
   "Return true if `window' is the current window of its Climacs
 instance."
-  (eq window (esa-current-window (pane-frame window))))
+  (eq window (esa:esa-current-window (clim:pane-frame window))))
 
 (defun ensure-only-view-active (climacs &optional view)
   "Ensure that `view' is the only view of `climacs' that is
 active. `View' may be NIL, in which case no view is set as
 active."
-  (dolist (other-view (views climacs))
+  (dolist (other-view (drei-core:views climacs))
     (unless (eq other-view view)
-      (setf (active other-view) nil)))
+      (setf (drei:active other-view) nil)))
   (unless (null view)
-    (setf (active view) t)))
+    (setf (drei:active view) t)))
 
-(defmethod (setf views) :around (new-value (frame climacs))
+(defmethod (setf drei-core:views) :around (new-value (frame climacs))
   ;; If any windows show a view that no longer exists in the
   ;; view-list, make them show something else. The view-list might be
   ;; destructively updated, so copy it for safekeeping. Also make sure
   ;; only one view thinks that it's active.
-  (with-accessors ((views views)) frame
+  (with-accessors ((views drei-core:views)) frame
     (let* ((old-views (copy-list views))
            (removed-views (set-difference
                            old-views (call-next-method) :test #'eq)))
-      (dolist (window (windows frame))
+      (dolist (window (esa:windows frame))
         (when (and (typep window 'climacs-pane)
-                   (member (view window) removed-views :test #'eq))
-          (handler-case (setf (view window)
+                   (member (drei::view window) removed-views :test #'eq))
+          (handler-case (setf (drei::view window)
                               (any-preferably-undisplayed-view))
             (view-already-displayed ()
               (delete-window window)))))))
   (ensure-only-view-active
-   frame (when (typep (esa-current-window frame) 'climacs-pane)
-           (view (esa-current-window frame)))))
+   frame (when (typep (esa:esa-current-window frame) 'climacs-pane)
+           (drei::view (esa:esa-current-window frame)))))
 
-(defmethod (setf views) :after ((new-value null) (frame climacs))
+(defmethod (setf drei-core:views) :after ((new-value null) (frame climacs))
   ;; You think you can remove all views? I laught at your silly
   ;; attempt!
   (setf (views frame) (list (make-new-view-for-climacs
