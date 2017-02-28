@@ -232,8 +232,8 @@
                                     esa:global-esa-table
                                     esa-io:esa-io-table))
 
-;; This command table is what assembles the various other command
-;; tables for the commands actually accessible by the user.
+;;; This command table is what assembles the various other command
+;;; tables for the commands actually accessible by the user.
 (defclass climacs-command-table (clim:standard-command-table)
   ())
 
@@ -244,7 +244,7 @@
             '(drei:editor-table))
           (call-next-method)))
 
-;; This is the actual command table that will be used for Climacs.
+;;; This is the actual command table that will be used for Climacs.
 (clim:make-command-table 'climacs-global-table
  :inherit-from (list (make-instance 'climacs-command-table
                       :name 'climacs-dispatching-table))
