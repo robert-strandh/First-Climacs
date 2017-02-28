@@ -76,8 +76,9 @@
           :initarg :view
           :initform (error "The view used in the error-causing operation must be supplied")
           :documentation "The view that is attempted set"))
-  (:documentation "This error is signalled when something goes
-wrong while setting the view of a Climacs pane."))
+  (:documentation
+   #.(format nil "This error is signalled when something goes wrong~@
+                  while setting the view of a Climacs pane.")))
 
 (define-condition unknown-view (view-setting-error)
   ()
@@ -85,9 +86,10 @@ wrong while setting the view of a Climacs pane."))
              (format
               stream "Attempting to set view of a window to view object ~A, which is not known to Climacs"
               (view condition))))
-  (:documentation "This error is signalled whenever a window is
-attempted to be set to a view that is not recognized by the
-Climacs instance the window belongs to."))
+  (:documentation 
+   #.(format nil "This error is signalled whenever a window is attempted~@
+                  to be set to a view that is not recognized by the~@
+                  Climacs instance the window belongs to.")))
 
 (define-condition view-already-displayed (view-setting-error)
   ((%window :accessor window
@@ -100,9 +102,10 @@ Climacs instance the window belongs to."))
               stream "Attempting to set view of a window to view object ~A,~@
                       which is already on display in another window"
               (view condition))))
-  (:documentation "This error is signalled whenever a window is
-attempted to be set to a view already on display in some other
-window"))
+  (:documentation
+   #.(format nil "This error is signalled whenever a window is~@
+                  attempted to be set to a view already on display~@
+                  in some other window")))
 
 (defmethod (setf drei::view) :around ((view drei:drei-view) (pane climacs-pane))
   (let ((window-displaying-view
@@ -440,14 +443,16 @@ displayed in any window. If necessary, clone a view on display."
   nil)
 
 (defgeneric display-view-info-to-info-pane (info-pane master-pane view)
-  (:documentation "Display interesting information about
-`view' (which is in `master-pane') to `info-pane'."))
+  (:documentation
+   #.(format nil "Display interesting information about VIEW
+                  (which is in MASTER-PANE) to INFO-PANE.")))
 
 (defgeneric display-view-status-to-info-pane (info-pane master-pane view)
-  (:documentation "Display interesting information about the
-status of `view' (which is in `master-pane') to `info-pane'. The
-status should be things like whether it is modified, read-only,
-etc."))
+  (:documentation 
+   #.(format nil "Display interesting information about the status~@
+                  of VIEW (which is in MASTER-PANE) to INFO-PANE.~@
+                  The status should be things like whether it is~@
+                   modified, read-only, etc.")))
 
 (defmethod display-view-info-to-info-pane ((info-pane climacs-info-pane)
                                            (master-pane climacs-pane)
@@ -635,11 +640,12 @@ If with-scrollbars nil, omit the scroller."
     (values vbox climacs-pane)))
 
 (defgeneric setup-split-pane (orig-pane new-pane clone-view)
-  (:documentation "Perform split-setup operations `new-pane',
-which is supposed to be a pane that has been freshly split from
-`orig-pane'. If `clone-view' is true, set the view of the new
-pane to a clone of the view in `orig-pane', provided that
-`orig-pane' has a view."))
+  (:documentation
+   #.(format nil "Perform split-setup operations NEW-PANE, which~@
+                  is supposed to be a pane that has been freshly split~@
+                  from ORIG-PANE. If CLONE-VIEW is true, set the view~@
+                  of the new pane to a clone of the view in ORIG-PANE,~@
+                  provided that ORIG-PANE has a view.")))
 
 (defmethod setup-split-pane ((orig-pane climacs-pane) (new-pane climacs-pane) clone-view)
   (when (buffer-view-p (view orig-pane))
