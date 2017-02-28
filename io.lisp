@@ -36,17 +36,19 @@
                  with the buffer BUFFER and the filepath FILEPATH.")
   (error 'buffer-contains-noncharacter :buffer buffer :filepath filepath))
 
-(defmethod esa-io:check-buffer-writability ((application-frame climacs1-gui:climacs)
-                                     (filepath pathname)
-                                     (buffer drei:drei-buffer))
+(defmethod esa-io:check-buffer-writability
+    ((application-frame climacs1-gui:climacs)
+     (filepath pathname)
+     (buffer drei:drei-buffer))
   (drei-base:do-buffer-region (object offset buffer 0 (drei-buffer:size buffer))
     (unless (characterp object)
       (buffer-contains-noncharacter buffer filepath)))
   (call-next-method))
 
-(defmethod esa-buffer:frame-save-buffer-to-stream ((application-frame climacs1-gui:climacs)
-                                        (buffer climacs1-gui:climacs-buffer)
-                                        stream)
+(defmethod esa-buffer:frame-save-buffer-to-stream
+    ((application-frame climacs1-gui:climacs)
+     (buffer climacs1-gui:climacs-buffer)
+     stream)
   (let ((seq (drei-buffer:buffer-sequence buffer 0 (drei-buffer:size buffer))))
     (if (every #'characterp seq)
         (write-sequence seq stream)
@@ -56,13 +58,14 @@
 (defun input-from-stream (stream buffer offset)
   (let* ((seq (make-string (file-length stream)))
          (count (#+mcclim read-sequence #-mcclim cl:read-sequence
-                          seq stream)))
+                 seq stream)))
     (drei-buffer:insert-buffer-sequence buffer offset
-                            (if (= count (length seq))
-                                seq
-                                (subseq seq 0 count)))))
+                                        (if (= count (length seq))
+                                            seq
+                                            (subseq seq 0 count)))))
 
-(defmethod esa-buffer:frame-make-buffer-from-stream ((application-frame climacs1-gui:climacs) stream)
+(defmethod esa-buffer:frame-make-buffer-from-stream
+    ((application-frame climacs1-gui:climacs) stream)
   (let* ((buffer (esa-buffer:make-new-buffer)))
     (input-from-stream stream buffer 0)
     (drei:clear-undo-history buffer)
