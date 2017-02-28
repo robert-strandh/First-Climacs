@@ -1,4 +1,4 @@
-;;;  (c) copyright 2004-2005 by
+;;;  (c) copyright 2004-2005, 2017 by
 ;;;           Robert Strandh (robert.strandh@gmail.com)
 ;;;  (c) copyright 2004-2005 by
 ;;;           Elliott Johnson (ejohnson@fasl.info)
