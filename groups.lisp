@@ -48,8 +48,8 @@ view."))
 
 (defclass synonym-group (group)
   ((%other-name :initarg :other-name
-                         :initform (error "The name of another group must be provided")
-                         :reader other-name))
+                :initform (error "The name of another group must be provided")
+                :reader other-name))
   (:documentation "Group class that forwards all methods to a
 group with a specific name."))
 
@@ -299,39 +299,45 @@ selected to be the active group by the user."
         (assert (stringp ,name))
         (setf (gethash ,name *persistent-groups*)
               (make-instance 'custom-group
-                             :name ,name
-                             :pathname-lister #'(lambda (,group)
-                                                  (destructuring-bind
-                                                        (&key ,@(mapcar #'(lambda (arg)
-                                                                            `((,arg ,arg)))
-                                                                        (mapcar #'first args)))
-                                                      (value-plist ,group)
-                                                    (let ((,group-arg ,group))
-                                                      ,@body)))
-                             :select-response #'(lambda (group)
-                                                  (declare (ignorable group))
-                                                  ,@(loop for (name form) in args
-                                                       collect `(setf (getf (value-plist group) ',name) ,form)))))))))
+                :name ,name
+                :pathname-lister
+                #'(lambda (,group)
+                    (destructuring-bind
+                        (&key ,@(mapcar #'(lambda (arg)
+                                            `((,arg ,arg)))
+                                        (mapcar #'first args)))
+                        (value-plist ,group)
+                      (let ((,group-arg ,group))
+                        ,@body)))
+                :select-response
+                #'(lambda (group)
+                    (declare (ignorable group))
+                    ,@(loop for (name form) in args
+                            collect `(setf (getf (value-plist group) ',name)
+                                           ,form)))))))))
 
 (define-group "Current Directory Files" (group)
   (declare (ignore group))
-  (directory (make-pathname :directory (pathname-directory (filepath (current-view)))
-                            :name :wild
-                            :type :wild)))
+  (directory (make-pathname
+              :directory (pathname-directory (filepath (current-view)))
+              :name :wild
+              :type :wild)))
 
-(define-group "Directory Files" (group (directory (accept 'pathname
-                                                          :prompt "Directory"
-                                                          :default (directory-of-buffer (buffer (current-view)))
-                                                          :insert-default t)))
+(define-group "Directory Files"
+    (group (directory (accept 'pathname
+                              :prompt "Directory"
+                              :default (directory-of-buffer (buffer (current-view)))
+                              :insert-default t)))
   (declare (ignore group))
   (directory (make-pathname :directory (pathname-directory directory)
                             :name :wild
                             :type :wild)))
 
-(define-group "Directory Lisp Files" (group (directory (accept 'pathname
-                                                               :prompt "Directory"
-                                                               :default (directory-of-buffer (buffer (current-view)))
-                                                               :insert-default t)))
+(define-group "Directory Lisp Files"
+    (group (directory (accept 'pathname
+                              :prompt "Directory"
+                              :default (directory-of-buffer (buffer (current-view)))
+                              :insert-default t)))
   (declare (ignore group))
   (directory (make-pathname :directory (pathname-directory directory)
                             :name :wild
