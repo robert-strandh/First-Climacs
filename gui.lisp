@@ -74,7 +74,9 @@
 (define-condition view-setting-error (error)
   ((%view :accessor view
           :initarg :view
-          :initform (error "The view used in the error-causing operation must be supplied")
+          :initform
+          (error #.(format nil "The view used in the error-causing~@
+                                operation must be supplied"))
           :documentation "The view that is attempted set"))
   (:documentation
    #.(format nil "This error is signalled when something goes wrong~@
@@ -84,7 +86,8 @@
   ()
   (:report (lambda (condition stream)
              (format
-              stream "Attempting to set view of a window to view object ~A, which is not known to Climacs"
+              stream "Attempting to set view of a window to view object ~A,~@
+                      which is not known to Climacs"
               (view condition))))
   (:documentation 
    #.(format nil "This error is signalled whenever a window is attempted~@
@@ -146,7 +149,8 @@
                           (clim:pane-frame window-displaying-view)
                           view)))
                  (cancel ()
-                   :report "Cancel the setting of the windows view and just return nil")))
+                   :report #.(format nil "Cancel the setting of the windows~@
+                                          view and just return nil"))))
               (t (call-next-method)))
       ;; Move view to the front of the view-list, doesn't carry
       ;; semantic significance, but makes view-switching more
