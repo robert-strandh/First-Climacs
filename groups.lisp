@@ -201,7 +201,7 @@ when it is selected or asked for pathnames."))
                 :initarg :group-name
                 :initform (error "A name for the group must be provided")))
   (:report (lambda (condition stream)
-	     (format stream "Group named ~a not found" (group-name condition))))
+             (format stream "Group named ~a not found" (group-name condition))))
   (:documentation "This condition is signaled whenever a synonym
   group is unable to find the group that it is supposed to
   forward method invocations to."))
@@ -357,24 +357,24 @@ selected to be the active group by the user."
      (default-type type))
   (multiple-value-bind (object success string)
       (complete-input stream
-		      (lambda (so-far action)
-			(complete-from-possibilities
-			 so-far
+                      (lambda (so-far action)
+                        (complete-from-possibilities
+                         so-far
                          (append (loop for key being the hash-keys of (groups *application-frame*)
                                     collecting key)
                                  (loop for key being the hash-keys of *persistent-groups*
                                     collecting key))
                          '(#\Space)
                          :action action
-			 :name-key #'identity
-			 :value-key #'identity))
-		      :partial-completers '(#\Space)
-		      :allow-any-input nil)
+                         :name-key #'identity
+                         :value-key #'identity))
+                      :partial-completers '(#\Space)
+                      :allow-any-input nil)
     (cond (success
-	   (values (get-group object) type))
-	  ((and (zerop (length string)) defaultp)
+           (values (get-group object) type))
+          ((and (zerop (length string)) defaultp)
            (values default default-type))
-	  (t (values string 'string)))))
+          (t (values string 'string)))))
 
 (define-presentation-method present (object (type group) stream view &key)
   (let ((name (name object)))
