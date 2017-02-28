@@ -21,10 +21,11 @@
 (cl:in-package #:climacs-core)
 
 (defvar *persistent-groups* (make-hash-table :test #'equal)
-  "A hash table of groups that are persistent across invocations
-of the Climacs editor. Typically, these do not designate concrete
-pathnames, but contain more abstract designations such as \"all
-files in the current directory\".")
+  #.(format nil "A hash table of groups that are persistent~@
+                 across invocations of the Climacs editor.~@
+                 Typically, these do not designate concrete~@
+                 pathnames, but contain more abstract designations~@
+                  such as \"all files in the current directory\"."))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; 
@@ -43,15 +44,14 @@ files in the current directory\".")
 
 (defclass current-view-group (group)
   ()
-  (:documentation "Group class denoting the currently active
-view."))
+  (:documentation "Group class denoting the currently active view."))
 
 (defclass synonym-group (group)
   ((%other-name :initarg :other-name
                 :initform (error "The name of another group must be provided")
                 :reader other-name))
-  (:documentation "Group class that forwards all methods to a
-group with a specific name."))
+  (:documentation #.(format nil "Group class that forwards all methods to a~@
+                                 group with a specific name.")))
 
 (defclass custom-group (group)
   ((%list-pathnames-lambda
@@ -74,20 +74,24 @@ when it is selected or asked for pathnames."))
 ;;; The group protocol.
 
 (defgeneric group-views (group)
-  (:documentation "Get a list of views in `group'. Only already
-existing views will be returned, use `ensure-group-views' if
-you want all views defined by the group."))
+  (:documentation 
+   #.(format nil "Get a list of views in GROUP. Only already existing~@
+                  views will be returned, use ENSURE-GROUP-VIEWS if~@
+                  you want all views defined by the group.")))
 
 (defgeneric ensure-group-views (group)
-  (:documentation "For each pathname in `group' that does not
-have a corresponding view, open a view for that pathname."))
+  (:documentation
+   #.(format nil "For each pathname in GROUP that does not have a~@
+                  corresponding view, open a view for that pathname.")))
 
 (defgeneric select-group (group)
-  (:documentation "Tell the group object `group' that the user
-has selected it. This method is responsible for setting the
-active group. If `group' needs additional information, it should
-query the user when this method is invoked. The standard method
-should be sufficient for most group classes.")
+  (:documentation 
+   #.(format nil "Tell the group object GROUP that the user has~@
+                  selected it. This method is responsible for~@
+                  setting the active group. If GROUP needs additional~@
+                  information, it should query the user when this method~@
+                  is invoked. The standard method should be sufficient~@
+                  for most group classes."))
   (:method ((group group))
     ;; Use a synonym group so that changes to the group of this name
     ;; will be reflected in the active group.
@@ -95,11 +99,12 @@ should be sufficient for most group classes.")
           (make-synonym-group group))))
 
 (defgeneric display-group-contents (group stream)
-  (:documentation "Display the contents of `group' to
-`stream'. Basically, this should describe which views or files
-would be affected by group-aware commands if `group' was the
-active group. There is no standard format for the output, but it
-is intended for displaying to the user."))
+  (:documentation
+   #.(format nil "Display the contents of GROUP to STREAM. Basically,~@
+                  this should describe which views or files would be~@
+                  affected by group-aware commands if GROUP was the~@
+                  active group. There is no standard format for the output,~@
+                  but it is intended for displaying to the user.")))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; 
@@ -107,9 +112,9 @@ is intended for displaying to the user."))
 
 ;; Display helper functions.
 (defun normalise-group-element (element)
-  "Turn `element' into either a pathname, an existing view or
-NIL. If a pathname is returned, it is assumed to be safe to find
-the file with that name."
+  #.(format nil "Turn ELEMENT into either a pathname, an existing~@
+                 view or NIL. If a pathname is returned, it is assumed~@
+                 to be safe to find the file with that name.")
   (typecase element
     (drei-view
      (find element (views *application-frame*)))
