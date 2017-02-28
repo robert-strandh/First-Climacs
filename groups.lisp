@@ -171,8 +171,8 @@
 (defmethod display-group-contents ((group standard-group)
                                    (stream clim:extended-output-stream))
   (clim:present (remove-if #'null
-                      (mapcar #'normalise-group-element (elements group)))
-           '(sequence (or pathname clim:view)) :stream stream))
+                           (mapcar #'normalise-group-element (elements group)))
+                '(sequence (or pathname clim:view)) :stream stream))
 
 ;;; The current view group (default).
 (defmethod group-views ((group current-view-group))
@@ -201,9 +201,10 @@
 (defmethod display-group-contents ((group custom-group)
                                    (stream clim:extended-output-stream))
   (let ((lister (pathname-lister group)))
-    (clim:present (remove-if
-              #'null (mapcar #'normalise-group-element (funcall lister group)))
-             '(sequence (or pathname clim:view)) :stream stream)))
+    (clim:present
+     (remove-if #'null
+                (mapcar #'normalise-group-element (funcall lister group)))
+     '(sequence (or pathname clim:view)) :stream stream)))
 
 ;;; Synonym groups.
 
@@ -280,7 +281,7 @@
   "Deselect the currently active group."
   (setf (climacs1-gui:active-group clim:*application-frame*)
         (make-instance 'current-view-group
-                       :name "none")))
+          :name "none")))
 
 (defmacro with-group-views ((views group &key keep) &body body)
   #.(format nil "Make sure that all files designated by GROUP are~@
@@ -295,8 +296,7 @@
              (,group ,group))
          (ensure-group-views ,group)
          (let* ((,views-after (drei-core:views clim:*application-frame*))
-                (,view-diff (set-difference ,views-after
-                                                  ,views-before))
+                (,view-diff (set-difference ,views-after ,views-before))
                 (,views (group-views ,group)))
            (unwind-protect (progn ,@body)
              (unless ,keep
@@ -344,9 +344,9 @@
 
 (define-group "Directory Files"
     (group (directory (clim:accept 'pathname
-                              :prompt "Directory"
-                              :default (directory-of-buffer (esa-io:buffer (drei:current-view)))
-                              :insert-default t)))
+                                   :prompt "Directory"
+                                   :default (directory-of-buffer (esa-io:buffer (drei:current-view)))
+                                   :insert-default t)))
   (declare (ignore group))
   (directory (make-pathname :directory (pathname-directory directory)
                             :name :wild
@@ -354,9 +354,9 @@
 
 (define-group "Directory Lisp Files"
     (group (directory (clim:accept 'pathname
-                              :prompt "Directory"
-                              :default (directory-of-buffer (esa-io:buffer (drei:current-view)))
-                              :insert-default t)))
+                                   :prompt "Directory"
+                                   :default (directory-of-buffer (esa-io:buffer (drei:current-view)))
+                                   :insert-default t)))
   (declare (ignore group))
   (directory (make-pathname :directory (pathname-directory directory)
                             :name :wild
