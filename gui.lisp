@@ -141,9 +141,10 @@
                    (setf (drei::view pane) view))
                  (clone-view ()
                    :report "Make a clone of the view and use that instead"
-                   (setf (drei::view pane) (clone-view-for-climacs
-                                            (clim:pane-frame window-displaying-view)
-                                            view)))
+                   (setf (drei::view pane)
+                         (clone-view-for-climacs
+                          (clim:pane-frame window-displaying-view)
+                          view)))
                  (cancel ()
                    :report "Cancel the setting of the windows view and just return nil")))
               (t (call-next-method)))
@@ -369,8 +370,9 @@ active."
 (defmethod (setf drei-core:views) :after ((new-value null) (frame climacs))
   ;; You think you can remove all views? I laught at your silly
   ;; attempt!
-  (setf (views frame) (list (make-new-view-for-climacs
-                             frame 'textual-drei-syntax-view))))
+  (setf (views frame)
+        (list (make-new-view-for-climacs
+               frame 'textual-drei-syntax-view))))
 
 (defmethod command-for-unbound-gestures ((frame climacs) gestures)
   (command-for-unbound-gestures (esa-current-window frame) gestures))
@@ -387,7 +389,8 @@ active."
   (let ((new-view (apply #'clone-view view
                    :subscript-generator (make-view-subscript-generator climacs)
                    :active nil initargs)))
-    (setf (syntax new-view) (make-syntax-for-view new-view (class-of (syntax view))))
+    (setf (syntax new-view)
+          (make-syntax-for-view new-view (class-of (syntax view))))
     (push new-view (views climacs))
     new-view))
 
@@ -484,13 +487,14 @@ active."
               (column-number point)))
     (princ #\( info-pane)
     (call-next-method)
-    (format info-pane "~{~:[~*~; ~A~]~}" (list
-                                          (overwrite-mode view)
-                                          "Ovwrt"
-                                          (auto-fill-mode view)
-                                          "Fill"
-                                          (isearch-mode master-pane)
-                                          "Isearch"))
+    (format info-pane "~{~:[~*~; ~A~]~}"
+            (list
+             (overwrite-mode view)
+             "Ovwrt"
+             (auto-fill-mode view)
+             "Fill"
+             (isearch-mode master-pane)
+             "Isearch"))
     (princ #\) info-pane)))
 
 (defmethod display-view-info-to-info-pane ((info-pane climacs-info-pane)
@@ -647,14 +651,18 @@ active."
                   of the new pane to a clone of the view in ORIG-PANE,~@
                   provided that ORIG-PANE has a view.")))
 
-(defmethod setup-split-pane ((orig-pane climacs-pane) (new-pane climacs-pane) clone-view)
+(defmethod setup-split-pane
+    ((orig-pane climacs-pane) (new-pane climacs-pane) clone-view)
   (when (buffer-view-p (view orig-pane))
-    (setf (offset (point (buffer (view orig-pane)))) (offset (point (view orig-pane)))))
-  (setf (view new-pane) (if clone-view
-                            (clone-view-for-climacs (pane-frame orig-pane) (view orig-pane))
-                            (any-preferably-undisplayed-view))))
+    (setf (offset (point (buffer (view orig-pane))))
+          (offset (point (view orig-pane)))))
+  (setf (view new-pane)
+        (if clone-view
+            (clone-view-for-climacs (pane-frame orig-pane) (view orig-pane))
+            (any-preferably-undisplayed-view))))
 
-(defun split-window (&optional (vertically-p nil) (clone-view nil) (pane (current-window)))
+(defun split-window
+    (&optional (vertically-p nil) (clone-view nil) (pane (current-window)))
   (with-look-and-feel-realization
       ((frame-manager *esa-instance*) *esa-instance*)
     (multiple-value-bind (vbox new-pane) (make-pane-constellation)
