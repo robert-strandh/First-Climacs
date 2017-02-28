@@ -110,7 +110,7 @@ when it is selected or asked for pathnames."))
 ;;;
 ;;; Protocol implementation.
 
-;; Display helper functions.
+;;; Display helper functions.
 (defun normalise-group-element (element)
   #.(format nil "Turn ELEMENT into either a pathname, an existing~@
                  view or NIL. If a pathname is returned, it is assumed~@
@@ -133,7 +133,7 @@ when it is selected or asked for pathnames."))
      ((or pathname string)
       (present norm-element 'pathname :stream stream)))))
 
-;; Singular group elements.
+;;; Singular group elements.
 (defmethod group-views ((group group-element))
   (let ((element (element group)))
     (cond ((and (typep element 'drei-view)
@@ -159,7 +159,7 @@ when it is selected or asked for pathnames."))
                                    (stream extended-output-stream))
   (display-group-element (element group) stream))
 
-;; Standard sequence groups.
+;;; Standard sequence groups.
 (defmethod group-views ((group standard-group))
   (apply #'append (mapcar #'group-views (elements group))))
 
@@ -171,7 +171,7 @@ when it is selected or asked for pathnames."))
   (present (remove-if #'null (mapcar #'normalise-group-element (elements group)))
            '(sequence (or pathname view)) :stream stream))
 
-;; The current view group (default).
+;;; The current view group (default).
 (defmethod group-views ((group current-view-group))
   (list (current-view)))
 
@@ -182,7 +182,7 @@ when it is selected or asked for pathnames."))
                                    (stream extended-output-stream))
   (display-group-element (current-view) stream))
 
-;; Custom groups.
+;;; Custom groups.
 (defmethod group-views ((group custom-group))
   (remove-if #'null (mapcar #'find-view-with-pathname (funcall (pathname-lister group) group))))
 
@@ -198,7 +198,7 @@ when it is selected or asked for pathnames."))
   (present (remove-if #'null (mapcar #'normalise-group-element (funcall (pathname-lister group) group)))
            '(sequence (or pathname view)) :stream stream))
 
-;; Synonym groups.
+;;; Synonym groups.
 
 (define-condition group-not-found (simple-error)
   ((%group-name :reader group-name
@@ -230,7 +230,7 @@ when it is selected or asked for pathnames."))
       (display-group-contents (get-group (other-name group)) stream)
       (error 'group-not-found :group-name (other-name group))))
 
-;; Util stuff.
+;;; Util stuff.
 (defun make-synonym-group (group)
   "Create and return a synonym group that refers to `group'. All
 group protocol-specified methods called on the synonym group will
