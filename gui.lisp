@@ -393,8 +393,8 @@ active."
     new-view))
 
 (defun make-new-view-for-climacs (climacs view-class &rest initargs)
-  "Instiantiate an object of type `view-class' and add it to
-`climacs's list of views."
+  #.(format nil "Instiantiate an object of type VIEW-CLASS and~@
+                 add it to CLIMACS's list of views.")
   (let ((new-view (apply #'make-instance view-class
                    :subscript-generator (make-view-subscript-generator climacs)
                    initargs)))
@@ -410,24 +410,25 @@ active."
   (view (esa-current-window *application-frame*)))
 
 (defun view-on-display (climacs view)
-  "Return true if `view' is on display in a window of `climacs',
-false otherwise."
+  #.(format nil "Return true if VIEW is on display in a~@
+                 window of CLIMACS, false otherwise.")
   (member view (remove-if-not #'(lambda (window)
                                   (typep window 'climacs-pane))
                               (windows climacs))
    :key #'view))
 
 (defun any-preferably-undisplayed-view ()
-  "Return some view, any view, preferable one that is not
-currently displayed in any window."
+  #.(format nil "Return some view, any view, preferable one~@
+                 that is not currently displayed in any window.")
   (or (find-if-not #'(lambda (view)
                        (view-on-display *esa-instance* view))
                    (views *esa-instance*))
       (any-view)))
 
 (defun any-undisplayed-view ()
-  "Return some view, any view, as long as it is not currently
-displayed in any window. If necessary, clone a view on display."
+  #.(format nil "Return some view, any view, as long as~@
+                 it is not currently displayed in any window.~@
+                 If necessary, clone a view on display.")
   (or (find-if-not #'(lambda (view)
                        (view-on-display *esa-instance* view))
                    (views *esa-instance*))
@@ -547,8 +548,8 @@ displayed in any window. If necessary, clone a view on display."
       (call-next-method)))
 
 (define-command (com-full-redisplay :name t :command-table base-table) ()
-  "Redisplay the contents of the current window.
-FIXME: does this really have that effect?"
+  #.(format nil "Redisplay the contents of the current window.~@
+                 FIXME: does this really have that effect?")
   (full-redisplay (current-window)))
 
 (set-key 'com-full-redisplay
@@ -556,9 +557,9 @@ FIXME: does this really have that effect?"
          '((#\l :control)))
 
 (defun activate-window (window)
-  "Set `window' to be the active window for its Climacs
-instance. `Window' must already be recognized by the Climacs
-instance."
+  #.(format nil "Set WINDOW to be the active window for its~@
+                 Climacs instance. WINDOW must already be~@
+                 recognized by the Climacs instance.")
   ;; Ensure that only one pane can be active.
   (let ((climacs (pane-frame window)))
     (unless (current-window-p window)
@@ -622,11 +623,11 @@ instance."
         finally (return parent)))
 
 (defun make-pane-constellation (&optional (with-scrollbars *with-scrollbars*))
-  "make a vbox containing a scroller pane as its first child and an
-info pane as its second child.  The scroller pane contains a viewport
-which contains an extended pane.  Return the vbox and the extended pane
-as two values.
-If with-scrollbars nil, omit the scroller."
+  #.(format nil "Make a vbox containing a scroller pane as its~@
+                 first child and an info pane as its second child.~@
+                 The scroller pane contains a viewport which contains an~@
+                 an extended pane.  Return the vbox and the extended pane~@
+                 as two values. If with-scrollbars nil, omit the scroller.")
   (let* ((climacs-pane
           (make-pane 'climacs-pane :name 'window))
          (vbox
