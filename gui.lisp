@@ -29,30 +29,32 @@
 (cl:in-package #:climacs1-gui)
 
 (defvar *default-external-format* :utf-8
-  "The encoding to use by default when reading and saving
-files.")
+  #.(format nil "The encoding to use by default when~@
+                 reading and saving files."))
 
 (defvar *with-scrollbars* t
   "If T, classic look and feel. If NIL, stripped-down look (:")
 
 (defvar *show-info-pane-mark-position* nil
-  "If T, show the line number and column number in the info pane
-  of all panes. If NIL, don't. This is off by default, as finding
-  the line and column numbers is potentially expensive.")
+  #.(format nil "If T, show the line number and column number~@
+                 in the info pane of all panes. If NIL, don't.~@
+                 This is off by default, as finding the line and~@
+                 column numbers is potentially expensive."))
 
 (defvar *climacs-target-creator* nil
-  "A function for creating targets for commands potentially
-acting over multiple views.")
+  #.(format nil "A function for creating targets for commands~@
+                 potentially acting over multiple views."))
 
 (defvar *climacs-text-style* (clim:make-text-style :fix nil nil)
   "The default CLIM text style used in Climacs panes.")
 
 (defclass climacs-buffer (drei:drei-buffer)
-  ((%external-format :initform *default-external-format*
-                     :accessor external-format
-                     :documentation "The external format that was
-used when reading the source destination of the buffer
-contents.")))
+  ((%external-format
+    :initform *default-external-format*
+    :accessor external-format
+    :documentation
+    #.(format nil "The external format that was used when reading~@
+                   the source destination of the buffer contents."))))
 
 (defclass climacs-pane (drei:drei-pane esa:esa-pane-mixin)
   ()
