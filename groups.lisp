@@ -31,7 +31,7 @@
 ;;;
 ;;; File/View group classes.
 
-(defclass group (name-mixin)
+(defclass group (esa-utils:name-mixin)
   ())
 
 (defclass group-element (group)
@@ -97,7 +97,7 @@
   (:method ((group group))
     ;; Use a synonym group so that changes to the group of this name
     ;; will be reflected in the active group.
-    (setf (active-group *application-frame*)
+    (setf (climacs1-gui:active-group clim:*application-frame*)
           (make-synonym-group group))))
 
 (defgeneric display-group-contents (group stream)
@@ -118,8 +118,8 @@
                  view or NIL. If a pathname is returned, it is assumed~@
                  to be safe to find the file with that name.")
   (typecase element
-    (drei-view
-     (find element (views *application-frame*)))
+    (drei:drei-view
+     (find element (drei-core:views clim:*application-frame*)))
     ((or pathname string)
      (or (find-view-with-pathname (pathname element))
          (when (findablep element)
@@ -130,16 +130,16 @@
 (defun display-group-element (element stream)
   (let ((norm-element (normalise-group-element element)))
     (typecase norm-element
-      (drei-view
-       (present norm-element 'view :stream stream))
+      (drei:drei-view
+       (clim:present norm-element 'clim:view :stream stream))
       ((or pathname string)
-       (present norm-element 'pathname :stream stream)))))
+       (clim:present norm-element 'pathname :stream stream)))))
 
 ;;; Singular group elements.
 (defmethod group-views ((group group-element))
   (let ((element (element group)))
-    (cond ((and (typep element 'drei-view)
-                (find element (views *application-frame*)))
+    (cond ((and (typep element 'drei:drei-view)
+                (find element (drei-core:views clim:*application-frame*)))
            (list element))
           ((or (pathnamep element)
                (stringp element))
@@ -149,16 +149,16 @@
 
 (defmethod ensure-group-views ((group group-element))
   (typecase (element group)
-    (drei-view
-     (unless (find (element group) (views *application-frame*))
-       (ensure-open-file (pathname (filepath (element group))))))
+    (drei:drei-view
+     (unless (find (element group) (drei-core:views clim:*application-frame*))
+       (ensure-open-file (pathname (esa-buffer:filepath (element group))))))
     (pathname
      (ensure-open-file (element group)))
     (string
      (ensure-open-file (pathname (element group))))))
 
 (defmethod display-group-contents ((group group-element)
-                                   (stream extended-output-stream))
+                                   (stream clim:extended-output-stream))
   (display-group-element (element group) stream))
 
 ;;; Standard sequence groups.
@@ -169,21 +169,21 @@
   (mapcar #'ensure-group-views (elements group)))
 
 (defmethod display-group-contents ((group standard-group)
-                                   (stream extended-output-stream))
-  (present (remove-if #'null
+                                   (stream clim:extended-output-stream))
+  (clim:present (remove-if #'null
                       (mapcar #'normalise-group-element (elements group)))
-           '(sequence (or pathname view)) :stream stream))
+           '(sequence (or pathname clim:view)) :stream stream))
 
 ;;; The current view group (default).
 (defmethod group-views ((group current-view-group))
-  (list (current-view)))
+  (list (drei:current-view)))
 
 (defmethod ensure-group-views ((group current-view-group))
   nil)
 
 (defmethod display-group-contents ((group current-view-group)
-                                   (stream extended-output-stream))
-  (display-group-element (current-view) stream))
+                                   (stream clim:extended-output-stream))
+  (display-group-element (drei:current-view) stream))
 
 ;;; Custom groups.
 (defmethod group-views ((group custom-group))
@@ -196,14 +196,14 @@
 
 (defmethod select-group ((group custom-group))
   (funcall (select-response group) group)
-  (setf (active-group *application-frame*) group))
+  (setf (climacs1-gui:active-group clim:*application-frame*) group))
 
 (defmethod display-group-contents ((group custom-group)
-                                   (stream extended-output-stream))
+                                   (stream clim:extended-output-stream))
   (let ((lister (pathname-lister group)))
-    (present (remove-if
+    (clim:present (remove-if
               #'null (mapcar #'normalise-group-element (funcall lister group)))
-             '(sequence (or pathname view)) :stream stream)))
+             '(sequence (or pathname clim:view)) :stream stream)))
 
 ;;; Synonym groups.
 
@@ -245,8 +245,8 @@
                  called on the synonym group will be forwarded to~@
                  a group with the same name as GROUP.")
   (make-instance 'synonym-group
-    :other-name (name group)
-    :name (name group)))
+    :other-name (esa-utils:name group)
+    :name (esa-utils:name group)))
 
 (defun make-group-element (object)
   "Make a `group-element' object containg `object' as element."
@@ -261,24 +261,24 @@
                  the elements ELEMENTS, which must be a list of~@
                  pathnames and/or views, and add it to the list of~@
                  defined groups.")
-  (setf (gethash name (groups *application-frame*))
+  (setf (gethash name (climacs1-gui:groups clim:*application-frame*))
         (make-instance 'standard-group
           :name name
           :elements (mapcar #'make-group-element elements))))
 
 (defun get-group (name)
   "Return the group with the name `name'."
-  (or (gethash name (groups *application-frame*))
+  (or (gethash name (climacs1-gui:groups clim:*application-frame*))
       (gethash name *persistent-groups*)))
 
 (defun get-active-group ()
   "Return the currently active group."
-  (or (active-group *application-frame*)
+  (or (climacs1-gui:active-group clim:*application-frame*)
       (deselect-group)))
 
 (defun deselect-group ()
   "Deselect the currently active group."
-  (setf (active-group *application-frame*)
+  (setf (climacs1-gui:active-group clim:*application-frame*)
         (make-instance 'current-view-group
                        :name "none")))
 
@@ -289,12 +289,12 @@
                  be saved and killed after BODY has run. Also, VIEWS~@
                  will be bound to a list of the views containing the~@
                  files designated by GROUP while BODY is run.")
-  (with-gensyms (views-before views-after view-diff)
-    (once-only (group keep)
-      `(let ((,views-before (views *application-frame*))
+  (esa-utils:with-gensyms (views-before views-after view-diff)
+    (esa-utils:once-only (group keep)
+      `(let ((,views-before (drei-core:views clim:*application-frame*))
              (,group ,group))
          (ensure-group-views ,group)
-         (let* ((,views-after (views *application-frame*))
+         (let* ((,views-after (drei-core:views clim:*application-frame*))
                 (,view-diff (set-difference ,views-after
                                                   ,views-before))
                 (,views (group-views ,group)))
@@ -312,8 +312,8 @@
                  element bound to the result of evaluating the second~@
                  element. The second element will be evaluated when the~@
                  group is selected to be the active group by the user.")
-  (with-gensyms (group)
-    (once-only (name)
+  (esa-utils:with-gensyms (group)
+    (esa-utils:once-only (name)
       `(let ((,name ,name))
          (assert (stringp ,name))
          (setf (gethash ,name *persistent-groups*)
@@ -338,14 +338,14 @@
 (define-group "Current Directory Files" (group)
   (declare (ignore group))
   (directory (make-pathname
-              :directory (pathname-directory (filepath (current-view)))
+              :directory (pathname-directory (esa-buffer:filepath (drei:current-view)))
               :name :wild
               :type :wild)))
 
 (define-group "Directory Files"
-    (group (directory (accept 'pathname
+    (group (directory (clim:accept 'pathname
                               :prompt "Directory"
-                              :default (directory-of-buffer (buffer (current-view)))
+                              :default (directory-of-buffer (esa-io:buffer (drei:current-view)))
                               :insert-default t)))
   (declare (ignore group))
   (directory (make-pathname :directory (pathname-directory directory)
@@ -353,9 +353,9 @@
                             :type :wild)))
 
 (define-group "Directory Lisp Files"
-    (group (directory (accept 'pathname
+    (group (directory (clim:accept 'pathname
                               :prompt "Directory"
-                              :default (directory-of-buffer (buffer (current-view)))
+                              :default (directory-of-buffer (esa-io:buffer (drei:current-view)))
                               :insert-default t)))
   (declare (ignore group))
   (directory (make-pathname :directory (pathname-directory directory)
@@ -366,16 +366,16 @@
 ;;;
 ;;; CLIM interface stuff.
 
-(define-presentation-method accept
+(clim:define-presentation-method clim:accept
     ((type group) stream view &key (default nil defaultp)
      (default-type type))
   (multiple-value-bind (object success string)
-      (complete-input
+      (clim:complete-input
        stream
        (lambda (so-far action)
-         (complete-from-possibilities
+         (clim:complete-from-possibilities
           so-far
-          (append (loop with groups = (groups *application-frame*)
+          (append (loop with groups = (climacs1-gui:groups clim:*application-frame*)
                         for key being the hash-keys of groups
                         collecting key)
                   (loop for key being the hash-keys of *persistent-groups*
@@ -392,22 +392,22 @@
            (values default default-type))
           (t (values string 'string)))))
 
-(define-presentation-method present
+(clim:define-presentation-method clim:present
     (object (type group) stream view &key)
-  (let ((name (name object)))
+  (let ((name (esa-utils:name object)))
     (princ name stream)))
 
-(define-presentation-method present
+(clim:define-presentation-method clim:present
     ((object synonym-group) (type group) stream view &key)
   (if (get-group (other-name object))
-      (present (get-group (other-name object)) type :stream stream :view view)
+      (clim:present (get-group (other-name object)) type :stream stream :view view)
       (error 'group-not-found :group-name (other-name object))))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;
 ;;; Now hook it all up.
 
-(defclass group-target-specification (view-list-target-specification)
+(defclass group-target-specification (drei-core:view-list-target-specification)
   ((%group :initarg :group
            :reader group
            :initform
@@ -415,26 +415,26 @@
   (:documentation #.(format nil "The target-specification class used~@
                                  for groups in Climacs.")))
 
-(defmethod activate-target-specification ((spec group-target-specification))
+(defmethod drei-core:activate-target-specification ((spec group-target-specification))
   (ensure-group-views (group spec))
-  (setf (views spec) (group-views (group spec)))
+  (setf (drei-core:views spec) (group-views (group spec)))
   (call-next-method))
 
-(defmethod next-target :around ((spec group-target-specification))
-  (handler-bind ((view-already-displayed
+(defmethod drei-core:next-target :around ((spec group-target-specification))
+  (handler-bind ((climacs1-gui:view-already-displayed
                   #'(lambda (c)
                       (declare (ignore c))
-                      (invoke-restart 'remove-other-use))))
+                      (invoke-restart 'climacs1-gui:remove-other-use))))
     (call-next-method)))
 
-(defmethod previous-target :around ((spec group-target-specification))
-  (handler-bind ((view-already-displayed
+(defmethod drei-core:previous-target :around ((spec group-target-specification))
+  (handler-bind ((climacs1-gui:view-already-displayed
                   #'(lambda (c)
                       (declare (ignore c))
-                      (invoke-restart 'remove-other-use))))
+                      (invoke-restart 'climacs1-gui:remove-other-use))))
     (call-next-method)))
 
-(setf *climacs-target-creator*
+(setf climacs1-gui:*climacs-target-creator*
       #'(lambda (drei)
           (make-instance 'group-target-specification
            :group (get-active-group)
