@@ -90,11 +90,13 @@ Climacs instance the window belongs to."))
 (define-condition view-already-displayed (view-setting-error)
   ((%window :accessor window
             :initarg :window
-            :initform (error "The window already displaying the view must be provided")
+            :initform
+            (error "The window already displaying the view must be provided")
             :documentation "The window that already displays the view"))
   (:report (lambda (condition stream)
              (format
-              stream "Attempting to set view of a window to view object ~A, which is already on display in another window"
+              stream "Attempting to set view of a window to view object ~A,~@
+                      which is already on display in another window"
               (view condition))))
   (:documentation "This error is signalled whenever a window is
 attempted to be set to a view already on display in some other
@@ -102,41 +104,43 @@ window"))
 
 (defmethod (setf drei::view) :around ((view drei:drei-view) (pane climacs-pane))
   (let ((window-displaying-view
-         (find-if #'(lambda (other-pane)
-                      (and (not (eq other-pane pane))
-                           (typep other-pane 'climacs-pane)
-                           (eq (drei::view other-pane) view)))
-                  (esa:windows (clim:pane-frame pane))))
+          (find-if #'(lambda (other-pane)
+                       (and (not (eq other-pane pane))
+                            (typep other-pane 'climacs-pane)
+                            (eq (drei::view other-pane) view)))
+                   (esa:windows (clim:pane-frame pane))))
         (old-view-active (drei:active (drei::view pane))))
     (prog1
         (cond ((not (member view (drei-core:views (clim:pane-frame pane))))
                (restart-case (error 'unknown-view :view view)
                  (add-to-view-list ()
-                  :report "Add the view object to Climacs"
-                  (push view (drei-core:views (clim:pane-frame pane)))
-                  (setf (drei::view pane) view))))
+                   :report "Add the view object to Climacs"
+                   (push view (drei-core:views (clim:pane-frame pane)))
+                   (setf (drei::view pane) view))))
               (window-displaying-view
                (restart-case
-                   (error 'view-already-displayed :view view :window window-displaying-view)
+                   (error 'view-already-displayed
+                          :view view :window window-displaying-view)
                  (switch-to-pane ()
-                  :report "Switch the active window to the one containing the view"
-                  (other-window window-displaying-view)
-                  view)
+                   :report "Switch the active window to the one containing the view"
+                   (other-window window-displaying-view)
+                   view)
                  (remove-other-use ()
-                  :report "Make the other window try to display some other view"
-                  (setf (view window-displaying-view) (any-preferably-undisplayed-view))
-                  (setf (drei::view pane) view))
+                   :report "Make the other window try to display some other view"
+                   (setf (view window-displaying-view)
+                         (any-preferably-undisplayed-view))
+                   (setf (drei::view pane) view))
                  (remove-other-pane ()
-                  :report "Remove the other window displaying the view"
-                  (delete-window window-displaying-view)
-                  (setf (drei::view pane) view))
+                   :report "Remove the other window displaying the view"
+                   (delete-window window-displaying-view)
+                   (setf (drei::view pane) view))
                  (clone-view ()
-                  :report "Make a clone of the view and use that instead"
-                  (setf (drei::view pane) (clone-view-for-climacs
-                                          (clim:pane-frame window-displaying-view)
-                                          view)))
+                   :report "Make a clone of the view and use that instead"
+                   (setf (drei::view pane) (clone-view-for-climacs
+                                            (clim:pane-frame window-displaying-view)
+                                            view)))
                  (cancel ()
-                  :report "Cancel the setting of the windows view and just return nil")))
+                   :report "Cancel the setting of the windows view and just return nil")))
               (t (call-next-method)))
       ;; Move view to the front of the view-list, doesn't carry
       ;; semantic significance, but makes view-switching more
