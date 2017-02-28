@@ -22,11 +22,11 @@
 
 (cl:in-package #:climacs-core)
 
-(define-condition buffer-contains-noncharacter (buffer-writing-error)
+(define-condition buffer-contains-noncharacter (esa-io:buffer-writing-error)
   ()
   (:report (lambda (condition stream)
              (format stream "Buffer ~A contains non-character object"
-                     (name (buffer condition)))))
+                     (esa-utils:name (esa-io:buffer condition)))))
   (:documentation
    #.(format nil "This error is signalled whenever an attempt is made~@
                   to save a buffer that contains a non-character object.")))
@@ -36,34 +36,34 @@
                  with the buffer BUFFER and the filepath FILEPATH.")
   (error 'buffer-contains-noncharacter :buffer buffer :filepath filepath))
 
-(defmethod check-buffer-writability ((application-frame climacs)
+(defmethod esa-io:check-buffer-writability ((application-frame climacs1-gui:climacs)
                                      (filepath pathname)
-                                     (buffer drei-buffer))
-  (do-buffer-region (object offset buffer 0 (size buffer))
+                                     (buffer drei:drei-buffer))
+  (drei-base:do-buffer-region (object offset buffer 0 (drei-buffer:size buffer))
     (unless (characterp object)
       (buffer-contains-noncharacter buffer filepath)))
   (call-next-method))
 
-(defmethod frame-save-buffer-to-stream ((application-frame climacs)
-                                        (buffer climacs-buffer)
+(defmethod esa-buffer:frame-save-buffer-to-stream ((application-frame climacs1-gui:climacs)
+                                        (buffer climacs1-gui:climacs-buffer)
                                         stream)
-  (let ((seq (buffer-sequence buffer 0 (size buffer))))
+  (let ((seq (drei-buffer:buffer-sequence buffer 0 (drei-buffer:size buffer))))
     (if (every #'characterp seq)
         (write-sequence seq stream)
-        (display-message
+        (esa:display-message
          "Cannot save to file, buffer contains non-character object"))))
 
 (defun input-from-stream (stream buffer offset)
   (let* ((seq (make-string (file-length stream)))
          (count (#+mcclim read-sequence #-mcclim cl:read-sequence
                           seq stream)))
-    (insert-buffer-sequence buffer offset
+    (drei-buffer:insert-buffer-sequence buffer offset
                             (if (= count (length seq))
                                 seq
                                 (subseq seq 0 count)))))
 
-(defmethod frame-make-buffer-from-stream ((application-frame climacs) stream)
-  (let* ((buffer (make-new-buffer)))
+(defmethod esa-buffer:frame-make-buffer-from-stream ((application-frame climacs1-gui:climacs) stream)
+  (let* ((buffer (esa-buffer:make-new-buffer)))
     (input-from-stream stream buffer 0)
-    (clear-undo-history buffer)
+    (drei:clear-undo-history buffer)
     buffer))
