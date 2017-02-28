@@ -265,14 +265,14 @@ window"))
    (climacs-window
     (let* ((esa:*esa-instance* clim:*application-frame*)
            (climacs-pane (clim:make-pane 'climacs-pane :active t))
-	   (esa:info-pane (clim:make-pane 'climacs-info-pane
+           (esa:info-pane (clim:make-pane 'climacs-info-pane
                        :master-pane climacs-pane)))
       (unless (output-stream esa:*esa-instance*)
         (setf (output-stream esa:*esa-instance*)
               (make-typeout-stream clim:*application-frame* "*standard-output*")))
       (setf (esa:windows clim:*application-frame*)
             (list climacs-pane)
-	    (drei-core:views clim:*application-frame*)
+            (drei-core:views clim:*application-frame*)
             (list (drei::view climacs-pane)))
       (clim:vertically ()
         (if *with-scrollbars*
@@ -461,16 +461,16 @@ etc."))
         (top (top view))
         (size (size (buffer view))))
     (format info-pane "  ~A  "
-	    (cond ((and (mark= size bot)
-			(mark= 0 top))
-		   "")
-		  ((mark= size bot)
-		   "Bot")
-		  ((mark= 0 top)
-		   "Top")
-		  (t (format nil "~a%"
-			     (round (* 100 (/ (offset top)
-					      size)))))))
+            (cond ((and (mark= size bot)
+                        (mark= 0 top))
+                   "")
+                  ((mark= size bot)
+                   "Bot")
+                  ((mark= 0 top)
+                   "Top")
+                  (t (format nil "~a%"
+                             (round (* 100 (/ (offset top)
+                                              size)))))))
     (when *show-info-pane-mark-position*
       (format info-pane "(~A,~A)     "
               (1+ (line-number point))
@@ -513,7 +513,7 @@ etc."))
 
 (defun display-info (frame pane)
   (let* ((master-pane (master-pane pane))
-	 (view (view master-pane)))
+         (view (view master-pane)))
     (princ "   " pane)
     (display-view-status-to-info-pane pane master-pane view)
     (with-text-face (pane :bold)
@@ -524,9 +524,9 @@ etc."))
     (display-view-info-to-info-pane pane master-pane view)
     (with-text-family (pane :sans-serif)
       (princ (if (recordingp frame)
-		 "Def"
-		 "")
-	     pane))))
+                 "Def"
+                 "")
+             pane))))
 
 (defmethod handle-drei-condition ((drei climacs-pane) condition)
   (call-next-method)
@@ -545,8 +545,8 @@ FIXME: does this really have that effect?"
   (full-redisplay (current-window)))
 
 (set-key 'com-full-redisplay
-	 'base-table
-	 '((#\l :control)))
+         'base-table
+         '((#\l :control)))
 
 (defun activate-window (window)
   "Set `window' to be the active window for its Climacs
@@ -571,15 +571,15 @@ instance."
 
 (defun replace-constellation (constellation additional-constellation vertical-p)
   (let* ((parent (sheet-parent constellation))
-	 (children (sheet-children parent))
-	 (first (first children))
-	 (second (second children))
-	 (third (third children))
-	 (first-split-p (= (length (sheet-children parent)) 2))
-	 (parent-region (sheet-region parent))
-	 (parent-height (rectangle-height parent-region))
-	 (parent-width (rectangle-width parent-region))
-	 (filler (when first-split-p (make-pane 'basic-pane))) ;Prevents resizing.
+         (children (sheet-children parent))
+         (first (first children))
+         (second (second children))
+         (third (third children))
+         (first-split-p (= (length (sheet-children parent)) 2))
+         (parent-region (sheet-region parent))
+         (parent-height (rectangle-height parent-region))
+         (parent-width (rectangle-width parent-region))
+         (filler (when first-split-p (make-pane 'basic-pane))) ;Prevents resizing.
          (adjust #+mcclim (make-pane 'clim-extensions:box-adjuster-gadget)))
     (assert (member constellation children))
     
@@ -589,30 +589,30 @@ instance."
     (sheet-disown-child parent constellation)
 
     (if vertical-p
-	(resize-sheet constellation parent-width (/ parent-height 2))
-	(resize-sheet constellation  (/ parent-width 2) parent-height))
+        (resize-sheet constellation parent-width (/ parent-height 2))
+        (resize-sheet constellation  (/ parent-width 2) parent-height))
     
     (let ((new (if vertical-p
-		   (vertically ()
-		     constellation adjust additional-constellation)
-		   (horizontally ()
-		     constellation adjust additional-constellation))))
+                   (vertically ()
+                     constellation adjust additional-constellation)
+                   (horizontally ()
+                     constellation adjust additional-constellation))))
       (sheet-adopt-child parent new)
 
       (when first-split-p (sheet-disown-child parent filler))
       (reorder-sheets parent 
-		      (if (eq constellation first)
-			  (if third
-			      (list new second third)
-			      (list new second))
-			  (if third
-			      (list first second new)
-			      (list first new)))))))
+                      (if (eq constellation first)
+                          (if third
+                              (list new second third)
+                              (list new second))
+                          (if third
+                              (list first second new)
+                              (list first new)))))))
 (defun find-parent (sheet)
   (loop for parent = (sheet-parent sheet)
-	  then (sheet-parent parent)
-	until (typep parent 'vrack-pane)
-	finally (return parent)))
+          then (sheet-parent parent)
+        until (typep parent 'vrack-pane)
+        finally (return parent)))
 
 (defun make-pane-constellation (&optional (with-scrollbars *with-scrollbars*))
   "make a vbox containing a scroller pane as its first child and an
@@ -621,14 +621,14 @@ which contains an extended pane.  Return the vbox and the extended pane
 as two values.
 If with-scrollbars nil, omit the scroller."
   (let* ((climacs-pane
-	  (make-pane 'climacs-pane :name 'window))
-	 (vbox
-	  (vertically ()
-	    (if with-scrollbars
-		(scrolling ()
-		  climacs-pane)
-		climacs-pane)
-	    (make-pane 'climacs-info-pane
+          (make-pane 'climacs-pane :name 'window))
+         (vbox
+          (vertically ()
+            (if with-scrollbars
+                (scrolling ()
+                  climacs-pane)
+                climacs-pane)
+            (make-pane 'climacs-info-pane
                        :master-pane climacs-pane))))
     (values vbox climacs-pane)))
 
@@ -651,40 +651,40 @@ pane to a clone of the view in `orig-pane', provided that
       ((frame-manager *esa-instance*) *esa-instance*)
     (multiple-value-bind (vbox new-pane) (make-pane-constellation)
       (let* ((current-window pane)
-	     (constellation-root (find-parent current-window)))
+             (constellation-root (find-parent current-window)))
         (setup-split-pane current-window new-pane clone-view)
-	(push new-pane (rest (windows *esa-instance*)))
-	(replace-constellation constellation-root vbox vertically-p)
-	(full-redisplay current-window)
-	(full-redisplay new-pane)
+        (push new-pane (rest (windows *esa-instance*)))
+        (replace-constellation constellation-root vbox vertically-p)
+        (full-redisplay current-window)
+        (full-redisplay new-pane)
         (activate-window pane)
-	new-pane))))
+        new-pane))))
 
 (defun delete-window (&optional (window (current-window)))
   (unless (null (cdr (windows *esa-instance*)))
     (let* ((constellation (find-parent window))
-	   (box (sheet-parent constellation))
-	   (box-children (sheet-children box))
-	   (other (if (eq constellation (first box-children))
-		      (third box-children)
-		      (first box-children)))
-	   (parent (sheet-parent box))
-	   (children (sheet-children parent))
-	   (first (first children))
-	   (second (second children))
-	   (third (third children)))
+           (box (sheet-parent constellation))
+           (box-children (sheet-children box))
+           (other (if (eq constellation (first box-children))
+                      (third box-children)
+                      (first box-children)))
+           (parent (sheet-parent box))
+           (children (sheet-children parent))
+           (first (first children))
+           (second (second children))
+           (third (third children)))
       (setf (windows *esa-instance*)
-	    (delete window (windows *esa-instance*)))
+            (delete window (windows *esa-instance*)))
       (sheet-disown-child box other)
       (sheet-adopt-child parent other)
       (sheet-disown-child parent box)
       (reorder-sheets parent (if (eq box first)
-				 (if third
-				     (list other second third)
-				     (list other second))
-				 (if third
-				     (list first second other)
-				     (list first other)))))))
+                                 (if third
+                                     (list other second third)
+                                     (list other second))
+                                 (if third
+                                     (list first second other)
+                                     (list first other)))))))
 
 (defun other-window (&optional pane)
   (if (and pane (find pane (windows *esa-instance*)))
