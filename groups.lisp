@@ -28,7 +28,7 @@
                   such as \"all files in the current directory\"."))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;; 
+;;;
 ;;; File/View group classes.
 
 (defclass group (name-mixin)
@@ -70,11 +70,11 @@
 when it is selected or asked for pathnames."))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;; 
+;;;
 ;;; The group protocol.
 
 (defgeneric group-views (group)
-  (:documentation 
+  (:documentation
    #.(format nil "Get a list of views in GROUP. Only already existing~@
                   views will be returned, use ENSURE-GROUP-VIEWS if~@
                   you want all views defined by the group.")))
@@ -85,7 +85,7 @@ when it is selected or asked for pathnames."))
                   corresponding view, open a view for that pathname.")))
 
 (defgeneric select-group (group)
-  (:documentation 
+  (:documentation
    #.(format nil "Tell the group object GROUP that the user has~@
                   selected it. This method is responsible for~@
                   setting the active group. If GROUP needs additional~@
@@ -107,7 +107,7 @@ when it is selected or asked for pathnames."))
                   but it is intended for displaying to the user.")))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;; 
+;;;
 ;;; Protocol implementation.
 
 ;; Display helper functions.
@@ -240,7 +240,7 @@ be forwarded to a group with the same name as `group'."
   (make-instance 'group-element :element object))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;; 
+;;;
 ;;; Interface
 
 (defun add-group (name elements)
@@ -349,7 +349,7 @@ selected to be the active group by the user."
                             :type "lisp")))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;; 
+;;;
 ;;; CLIM interface stuff.
 
 (define-presentation-method accept
@@ -386,7 +386,7 @@ selected to be the active group by the user."
       (error 'group-not-found :group-name (other-name object))))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;; 
+;;;
 ;;; Now hook it all up.
 
 (defclass group-target-specification (view-list-target-specification)
