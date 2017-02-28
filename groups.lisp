@@ -213,7 +213,7 @@
                 :initform (error "A name for the group must be provided")))
   (:report (lambda (condition stream)
              (format stream "Group named ~a not found" (group-name condition))))
-  (:documentation 
+  (:documentation
    #.(format nil "This condition is signaled whenever a synonym group~@
                   is unable to find the group that it is supposed to~@
                   forward method invocations to.")))
@@ -370,20 +370,22 @@
     ((type group) stream view &key (default nil defaultp)
      (default-type type))
   (multiple-value-bind (object success string)
-      (complete-input stream
-                      (lambda (so-far action)
-                        (complete-from-possibilities
-                         so-far
-                         (append (loop for key being the hash-keys of (groups *application-frame*)
-                                    collecting key)
-                                 (loop for key being the hash-keys of *persistent-groups*
-                                    collecting key))
-                         '(#\Space)
-                         :action action
-                         :name-key #'identity
-                         :value-key #'identity))
-                      :partial-completers '(#\Space)
-                      :allow-any-input nil)
+      (complete-input
+       stream
+       (lambda (so-far action)
+         (complete-from-possibilities
+          so-far
+          (append (loop with groups = (groups *application-frame*)
+                        for key being the hash-keys of groups
+                        collecting key)
+                  (loop for key being the hash-keys of *persistent-groups*
+                        collecting key))
+          '(#\Space)
+          :action action
+          :name-key #'identity
+          :value-key #'identity))
+       :partial-completers '(#\Space)
+       :allow-any-input nil)
     (cond (success
            (values (get-group object) type))
           ((and (zerop (length string)) defaultp)
@@ -408,9 +410,10 @@
 (defclass group-target-specification (view-list-target-specification)
   ((%group :initarg :group
            :reader group
-           :initform (error "A group must be provided for a group target specification")))
-  (:documentation "The target-specification class used for groups
-in Climacs."))
+           :initform
+           (error "A group must be provided for a group target specification")))
+  (:documentation #.(format nil "The target-specification class used~@
+                                 for groups in Climacs.")))
 
 (defmethod activate-target-specification ((spec group-target-specification))
   (ensure-group-views (group spec))
