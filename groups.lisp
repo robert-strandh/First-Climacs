@@ -56,7 +56,8 @@
 (defclass custom-group (group)
   ((%list-pathnames-lambda
     :initarg :pathname-lister
-    :initform (error "A custom group must have code for retrieving a list of pathnames")
+    :initform
+    (error "A custom group must have code for retrieving a list of pathnames")
     :reader pathname-lister)
    (%select-group-lambda
     :initarg :select-response
@@ -66,8 +67,9 @@
    (%value-plist
     :initform nil
     :accessor value-plist))
-  (:documentation "A group that will call a provided function
-when it is selected or asked for pathnames."))
+  (:documentation
+   #.(format nil "A group that will call a provided function~@
+                  when it is selected or asked for pathnames.")))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;
@@ -127,11 +129,11 @@ when it is selected or asked for pathnames."))
 
 (defun display-group-element (element stream)
   (let ((norm-element (normalise-group-element element)))
-   (typecase norm-element
-     (drei-view
-      (present norm-element 'view :stream stream))
-     ((or pathname string)
-      (present norm-element 'pathname :stream stream)))))
+    (typecase norm-element
+      (drei-view
+       (present norm-element 'view :stream stream))
+      ((or pathname string)
+       (present norm-element 'pathname :stream stream)))))
 
 ;;; Singular group elements.
 (defmethod group-views ((group group-element))
@@ -168,7 +170,8 @@ when it is selected or asked for pathnames."))
 
 (defmethod display-group-contents ((group standard-group)
                                    (stream extended-output-stream))
-  (present (remove-if #'null (mapcar #'normalise-group-element (elements group)))
+  (present (remove-if #'null
+                      (mapcar #'normalise-group-element (elements group)))
            '(sequence (or pathname view)) :stream stream))
 
 ;;; The current view group (default).
@@ -184,7 +187,9 @@ when it is selected or asked for pathnames."))
 
 ;;; Custom groups.
 (defmethod group-views ((group custom-group))
-  (remove-if #'null (mapcar #'find-view-with-pathname (funcall (pathname-lister group) group))))
+  (let ((lister (pathname-lister group)))
+    (remove-if #'null
+               (mapcar #'find-view-with-pathname (funcall lister group)))))
 
 (defmethod ensure-group-views ((group custom-group))
   (mapcar #'ensure-open-file (funcall (pathname-lister group) group)))
@@ -195,8 +200,10 @@ when it is selected or asked for pathnames."))
 
 (defmethod display-group-contents ((group custom-group)
                                    (stream extended-output-stream))
-  (present (remove-if #'null (mapcar #'normalise-group-element (funcall (pathname-lister group) group)))
-           '(sequence (or pathname view)) :stream stream))
+  (let ((lister (pathname-lister group)))
+    (present (remove-if
+              #'null (mapcar #'normalise-group-element (funcall lister group)))
+             '(sequence (or pathname view)) :stream stream)))
 
 ;;; Synonym groups.
 
@@ -206,9 +213,10 @@ when it is selected or asked for pathnames."))
                 :initform (error "A name for the group must be provided")))
   (:report (lambda (condition stream)
              (format stream "Group named ~a not found" (group-name condition))))
-  (:documentation "This condition is signaled whenever a synonym
-  group is unable to find the group that it is supposed to
-  forward method invocations to."))
+  (:documentation 
+   #.(format nil "This condition is signaled whenever a synonym group~@
+                  is unable to find the group that it is supposed to~@
+                  forward method invocations to.")))
 
 (defmethod group-views ((group synonym-group))
   (if (get-group (other-name group))
@@ -232,12 +240,13 @@ when it is selected or asked for pathnames."))
 
 ;;; Util stuff.
 (defun make-synonym-group (group)
-  "Create and return a synonym group that refers to `group'. All
-group protocol-specified methods called on the synonym group will
-be forwarded to a group with the same name as `group'."
+  #.(format nil "Create and return a synonym group that refers~@
+                 to GROUP. All group protocol-specified methods~@
+                 called on the synonym group will be forwarded to~@
+                 a group with the same name as GROUP.")
   (make-instance 'synonym-group
-                 :other-name (name group)
-                 :name (name group)))
+    :other-name (name group)
+    :name (name group)))
 
 (defun make-group-element (object)
   "Make a `group-element' object containg `object' as element."
@@ -248,14 +257,14 @@ be forwarded to a group with the same name as `group'."
 ;;; Interface
 
 (defun add-group (name elements)
-  "Define a group called `name' (a string) containing the elements `elements',
-which must be a list of pathnames and/or views, and add it to
-the list of defined groups."
+  #.(format nil "Define a group called NAME (a string) containing~@
+                 the elements ELEMENTS, which must be a list of~@
+                 pathnames and/or views, and add it to the list of~@
+                 defined groups.")
   (setf (gethash name (groups *application-frame*))
-        (make-instance
-         'standard-group
-         :name name
-         :elements (mapcar #'make-group-element elements))))
+        (make-instance 'standard-group
+          :name name
+          :elements (mapcar #'make-group-element elements))))
 
 (defun get-group (name)
   "Return the group with the name `name'."
@@ -274,12 +283,12 @@ the list of defined groups."
                        :name "none")))
 
 (defmacro with-group-views ((views group &key keep) &body body)
-  "Make sure that all files designated by `group' are open in
-views during the evaluation of `body'. If `keep' is NIL, all
-views created by this macro will be saved and killed after
-`body' has run. Also, `views' will be bound to a list of the
-views containing the files designated by `group' while `body'
-is run."
+  #.(format nil "Make sure that all files designated by GROUP are~@
+                 open in views during the evaluation of BODY. If~@
+                 KEEP is NIL, all views created by this macro will~@
+                 be saved and killed after BODY has run. Also, VIEWS~@
+                 will be bound to a list of the views containing the~@
+                 files designated by GROUP while BODY is run.")
   (with-gensyms (views-before views-after view-diff)
     (once-only (group keep)
       `(let ((,views-before (views *application-frame*))
@@ -296,34 +305,35 @@ is run."
                   do (kill-view view)))))))))
 
 (defmacro define-group (name (group-arg &rest args) &body body)
-  "Define a persistent group named `name'. `Body' should return a
-list of pathnames and will be used to calculate which files are
-designated by the group. `Args' should be two-element lists, with
-the first element bound to the result of evaluating the second
-element. The second element will be evaluated when the group is
-selected to be the active group by the user."
+  #.(format nil "Define a persistent group named NAME. BODY should~@
+                 return a list of pathnames and will be used to~@
+                 calculate which files are designated by the group.~@
+                 ARGS should be two-element lists, with the first~@
+                 element bound to the result of evaluating the second~@
+                 element. The second element will be evaluated when the~@
+                 group is selected to be the active group by the user.")
   (with-gensyms (group)
-   (once-only (name)
-     `(let ((,name ,name))
-        (assert (stringp ,name))
-        (setf (gethash ,name *persistent-groups*)
-              (make-instance 'custom-group
-                :name ,name
-                :pathname-lister
-                #'(lambda (,group)
-                    (destructuring-bind
-                        (&key ,@(mapcar #'(lambda (arg)
-                                            `((,arg ,arg)))
-                                        (mapcar #'first args)))
-                        (value-plist ,group)
-                      (let ((,group-arg ,group))
-                        ,@body)))
-                :select-response
-                #'(lambda (group)
-                    (declare (ignorable group))
-                    ,@(loop for (name form) in args
-                            collect `(setf (getf (value-plist group) ',name)
-                                           ,form)))))))))
+    (once-only (name)
+      `(let ((,name ,name))
+         (assert (stringp ,name))
+         (setf (gethash ,name *persistent-groups*)
+               (make-instance 'custom-group
+                 :name ,name
+                 :pathname-lister
+                 #'(lambda (,group)
+                     (destructuring-bind
+                         (&key ,@(mapcar #'(lambda (arg)
+                                             `((,arg ,arg)))
+                                         (mapcar #'first args)))
+                         (value-plist ,group)
+                       (let ((,group-arg ,group))
+                         ,@body)))
+                 :select-response
+                 #'(lambda (group)
+                     (declare (ignorable group))
+                     ,@(loop for (name form) in args
+                             collect `(setf (getf (value-plist group) ',name)
+                                            ,form)))))))))
 
 (define-group "Current Directory Files" (group)
   (declare (ignore group))
