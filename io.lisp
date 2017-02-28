@@ -1,4 +1,4 @@
-;;;  (c) copyright 2004 by
+;;;  (c) copyright 2004, 2017 by
 ;;;           Robert Strandh (robert.strandh@gmail.com)
 ;;;  (c) copyright 2006 by
 ;;;           Troels Henriksen (athas@sigkill.dk)
