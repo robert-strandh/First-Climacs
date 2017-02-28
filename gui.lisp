@@ -321,12 +321,14 @@
 
 (defmethod esa:esa-current-buffer ((application-frame climacs))
   (when (buffer-pane-p (esa:esa-current-window application-frame))
-    (esa-io:buffer (drei:current-view (esa:esa-current-window application-frame)))))
+    (let ((current-window (esa:esa-current-window application-frame)))
+      (esa-io:buffer (drei:current-view current-window)))))
 
 (defmethod (setf esa:esa-current-buffer) ((new-buffer climacs-buffer)
                                           (application-frame climacs))
-  (setf (esa-io:buffer (drei:current-view (esa:esa-current-window application-frame)))
-        new-buffer))
+  (let ((current-window (esa:esa-current-window application-frame)))
+    (setf (esa-io:buffer (drei:current-view current-window))
+          new-buffer)))
 
 (defmethod drei:drei-instance-of ((frame climacs))
   (esa:esa-current-window frame))
