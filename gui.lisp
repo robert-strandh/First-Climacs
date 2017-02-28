@@ -156,8 +156,7 @@
         (ensure-only-view-active (clim:pane-frame pane) view)))))
 
 (defmethod (setf drei::view) :before ((view drei:drei-view) (pane climacs-pane))
-  ;;  (with-accessors ((views views)) (pane-frame pane)
-    (drei:full-redisplay pane)) ;)
+  (drei:full-redisplay pane))
 
 (defgeneric buffer-pane-p (pane)
   (:documentation "Returns T when a pane contains a buffer."))
