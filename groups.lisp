@@ -155,7 +155,8 @@ when it is selected or asked for pathnames."))
     (string
      (ensure-open-file (pathname (element group))))))
 
-(defmethod display-group-contents ((group group-element) (stream extended-output-stream))
+(defmethod display-group-contents ((group group-element)
+                                   (stream extended-output-stream))
   (display-group-element (element group) stream))
 
 ;; Standard sequence groups.
@@ -165,7 +166,8 @@ when it is selected or asked for pathnames."))
 (defmethod ensure-group-views ((group standard-group))
   (mapcar #'ensure-group-views (elements group)))
 
-(defmethod display-group-contents ((group standard-group) (stream extended-output-stream))
+(defmethod display-group-contents ((group standard-group)
+                                   (stream extended-output-stream))
   (present (remove-if #'null (mapcar #'normalise-group-element (elements group)))
            '(sequence (or pathname view)) :stream stream))
 
@@ -176,7 +178,8 @@ when it is selected or asked for pathnames."))
 (defmethod ensure-group-views ((group current-view-group))
   nil)
 
-(defmethod display-group-contents ((group current-view-group) (stream extended-output-stream))
+(defmethod display-group-contents ((group current-view-group)
+                                   (stream extended-output-stream))
   (display-group-element (current-view) stream))
 
 ;; Custom groups.
@@ -190,7 +193,8 @@ when it is selected or asked for pathnames."))
   (funcall (select-response group) group)
   (setf (active-group *application-frame*) group))
 
-(defmethod display-group-contents ((group custom-group) (stream extended-output-stream))
+(defmethod display-group-contents ((group custom-group)
+                                   (stream extended-output-stream))
   (present (remove-if #'null (mapcar #'normalise-group-element (funcall (pathname-lister group) group)))
            '(sequence (or pathname view)) :stream stream))
 
@@ -376,11 +380,13 @@ selected to be the active group by the user."
            (values default default-type))
           (t (values string 'string)))))
 
-(define-presentation-method present (object (type group) stream view &key)
+(define-presentation-method present
+    (object (type group) stream view &key)
   (let ((name (name object)))
     (princ name stream)))
 
-(define-presentation-method present ((object synonym-group) (type group) stream view &key)
+(define-presentation-method present
+    ((object synonym-group) (type group) stream view &key)
   (if (get-group (other-name object))
       (present (get-group (other-name object)) type :stream stream :view view)
       (error 'group-not-found :group-name (other-name object))))
