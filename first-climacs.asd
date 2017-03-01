@@ -48,7 +48,5 @@
    (:file "climacs-lisp-syntax")
    (:file "climacs-lisp-syntax-commands")
    (:file "structured-editing")
-   (:file "c-syntax")
-   (:file "c-syntax-commands")
    (:file "java-syntax")
    (:file "java-syntax-commands")))
