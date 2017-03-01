@@ -24,28 +24,28 @@
 ;;; Free Software Foundation, Inc., 59 Temple Place - Suite 330,
 ;;; Boston, MA  02111-1307  USA.
 
-;;; Windows commands for the Climacs editor. 
+;;; Windows commands for the Climacs editor.
 
 (cl:in-package #:climacs-commands)
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;; 
+;;;
 ;;; Commands for splitting windows
 
 (defun split-window-maybe-cloning (vertically-p clone-current-view-p)
-  "Split `(current-window)', vertically if `vertically-p' is true,
-horizontally otherwise. If `clone-current-view-p' is true, use a
-clone of `(current-view)' for the new window."
+  #.(format nil "Split `(current-window)', vertically if `vertically-p'~@
+                 is true, horizontally otherwise. If `clone-current-view-p'~@
+                 is true, use a clone of `(current-view)' for the new window.")
   (handler-bind ((view-already-displayed
-                  #'(lambda (condition)
-                      (declare (ignore condition))
-                      ;; If this happens, `clone-current-view-p' is false.
-                      (display-message "Can't split: no view available for new window")
-                      (return-from split-window-maybe-cloning nil))))
+                   #'(lambda (condition)
+                       (declare (ignore condition))
+                       ;; If this happens, `clone-current-view-p' is false.
+                       (display-message "Can't split: no view available for new window")
+                       (return-from split-window-maybe-cloning nil))))
     (split-window vertically-p clone-current-view-p)))
 
-(define-command (com-split-window-vertically :name t
-                                             :command-table window-table)
+(define-command
+    (com-split-window-vertically :name t :command-table window-table)
     ((clone-current-view 'boolean :default nil))
   (split-window-maybe-cloning t clone-current-view))
 
@@ -53,8 +53,8 @@ clone of `(current-view)' for the new window."
          'window-table
          '((#\x :control) (#\2)))
 
-(define-command (com-split-window-horizontally :name t
-                                               :command-table window-table)
+(define-command
+    (com-split-window-horizontally :name t :command-table window-table)
     ((clone-current-view 'boolean :default nil))
   (split-window-maybe-cloning nil clone-current-view))
 
@@ -87,7 +87,8 @@ clone of `(current-view)' for the new window."
                     do (incf scan))
          (return scan)))))
 
-(define-command (com-switch-to-this-window :name nil :command-table window-table)
+(define-command
+    (com-switch-to-this-window :name nil :command-table window-table)
     ((window 'pane) (x 'integer) (y 'integer))
   (other-window window)
   (when (and (buffer-pane-p window)
@@ -96,8 +97,7 @@ clone of `(current-view)' for the new window."
           (click-to-offset window x y))))
 
 (define-presentation-to-command-translator blank-area-to-switch-to-this-window
-    (blank-area com-switch-to-this-window window-table
-                :echo nil)
+    (blank-area com-switch-to-this-window window-table :echo nil)
     (window x y)
   (list window x y))
 
@@ -172,18 +172,18 @@ clone of `(current-view)' for the new window."
          '((#\x :control) (#\0)))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;; 
+;;;
 ;;; Commands for switching/killing current view.
 
 (define-command (com-switch-to-view :name t :command-table window-table)
     ;; Perhaps the default should be an undisplayed view?
     ((view 'view :default (or (find (current-view) (views *application-frame*)
-                               :test (complement #'eq))
+                                    :test (complement #'eq))
                               (any-view))))
-  "Prompt for a view name and switch to that view.
-If the a view with that name does not exist, create a buffer-view
-with the name and switch to it. Uses the name of the next
-view (if any) as a default."
+  #.(format nil "Prompt for a view name and switch to that view. If a~@
+                 view with that name does not exist, create a buffer-view~@
+                 with the name and switch to it. Uses the name of the next~@
+                 view (if any) as a default.")
   (handler-case (switch-to-view (current-window) view)
     (view-already-displayed (condition)
       (other-window (window condition)))))
@@ -195,10 +195,10 @@ view (if any) as a default."
 (define-command (com-kill-view :name t :command-table window-table)
     ((view 'view :prompt "Kill view"
                  :default (current-view)))
-  "Prompt for a view name and kill that view.
-If the view is of a buffer and the buffer needs saving, you will
-be prompted to do so before killing it. Uses the current view
-as a default."
+  #.(format nil "Prompt for a view name and kill that view. If the view~@
+                 is of a buffer and the buffer needs saving, you will be~@
+                 prompted to do so before killing it. Uses the current view~@
+                 as a default.")
   (kill-view view))
 
 (set-key `(com-kill-view ,*unsupplied-argument-marker*)
