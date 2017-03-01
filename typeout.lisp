@@ -213,7 +213,8 @@
   (with-typeout-view (typeout (label stream))
     (trivial-gray-streams:stream-start-line-p typeout)))
 
-(defmethod trivial-gray-streams:stream-write-string ((stream typeout-stream) string &optional (start 0) end)
+(defmethod trivial-gray-streams:stream-write-string
+    ((stream typeout-stream) string &optional (start 0) end)
   (with-typeout-view (typeout (label stream))
     (trivial-gray-streams:stream-write-string typeout string start end)))
 
@@ -237,7 +238,8 @@
   (with-typeout-view (typeout (label stream))
     (trivial-gray-streams:stream-clear-output typeout)))
 
-(defmethod trivial-gray-streams:stream-advance-to-column ((stream typeout-stream) (column integer))
+(defmethod trivial-gray-streams:stream-advance-to-column
+    ((stream typeout-stream) (column integer))
   (with-typeout-view (typeout (label stream))
     (trivial-gray-streams:stream-advance-to-column typeout column)))
 
@@ -313,7 +315,9 @@
     (when overlay
       (clim:move-sheet overlay 0 0)
       (clim:allocate-space
-       overlay width (clim:space-requirement-height (clim:compose-space overlay))))))
+       overlay
+       width
+       (clim:space-requirement-height (clim:compose-space overlay))))))
 
 (defmethod clim:compose-space ((pane overlaying-pane) &rest args)
   (apply #'clim:compose-space (content-pane pane) args))
@@ -322,7 +326,8 @@
   #.(format nil "Create an overlaying pane with CONTENTS arranged~@
                  vertically as the contents of the overlaying pane.~@
                  There will be no initial overlay.")
-  `(clim:make-pane 'overlaying-pane ,@options :contents (clim:vertically () ,@contents)))
+  `(clim:make-pane 'overlaying-pane ,@options
+                   :contents (clim:vertically () ,@contents)))
 
 (defun pane-overlayer (pane)
   "Return the `overlaying-pane' that contains `pane'"
@@ -422,10 +427,13 @@
 (define-dispatching-fun clim:note-frame-disabled (frame-manager frame))
 (define-dispatching-fun clim:note-frame-iconified (frame-manager frame))
 (define-dispatching-fun clim:note-frame-deiconified (frame-manager frame))
-(define-dispatching-fun clim:note-command-enabled (frame-manager frame command-name))
-(define-dispatching-fun clim:note-command-disabled (frame-manager frame command-name))
+(define-dispatching-fun clim:note-command-enabled
+    (frame-manager frame command-name))
+(define-dispatching-fun clim:note-command-disabled
+    (frame-manager frame command-name))
 
-(defmethod clim:frame-manager-notify-user ((frame-manager climacs-frame-manager) message &rest args)
+(defmethod clim:frame-manager-notify-user
+    ((frame-manager climacs-frame-manager) message &rest args)
   (apply #'clim:frame-manager-notify-user frame-manager message args))
 
 (define-dispatching-fun clim:generate-panes (frame-manager frame))
@@ -451,13 +459,15 @@
     (funcall drawer menu presentation-type))
   (let ((clim:*pointer-documentation-output* pointer-documentation))
     (handler-case
-        (clim:with-input-context (`(or ,presentation-type clim:blank-area) :override t)
+        (clim:with-input-context
+            (`(or ,presentation-type clim:blank-area) :override t)
             (object type clim:event)
-            (prog1 nil (loop for gesture = (clim:read-gesture :stream menu :peek-p t)
-                             until (or (and (typep gesture 'clim:keyboard-event)
-                                            (clim:keyboard-event-character gesture))
-                                       (characterp gesture))
-                             do (clim:read-gesture :stream menu)))
+            (prog1 nil
+              (loop for gesture = (clim:read-gesture :stream menu :peek-p t)
+                    until (or (and (typep gesture 'clim:keyboard-event)
+                                   (clim:keyboard-event-character gesture))
+                              (characterp gesture))
+                    do (clim:read-gesture :stream menu)))
           (clim:blank-area nil)
           (t (values object event)))
       (clim:abort-gesture () nil))))
@@ -478,15 +488,18 @@
            (let* ((height (clim:bounding-rectangle-height
                            (clim:with-new-output-record (overlay)
                              (when label
-                               (clim:with-text-style (overlay (clim:make-text-style :serif :italic :large))
+                               (clim:with-text-style
+                                   (overlay (clim:make-text-style
+                                             :serif :italic :large))
                                  (write-string label overlay)
                                  (terpri overlay)))
                              (clim:draw-standard-menu overlay type items
                                                  (if default-item-p
                                                      default-item
                                                      (first items))
-                                                 :item-printer (or printer
-                                                                   #'clim:print-menu-item)
+                                                 :item-printer
+                                                 (or printer
+                                                     #'clim:print-menu-item)
                                                  :max-width max-width
                                                  :max-height max-height
                                                  :n-rows n-rows
@@ -505,11 +518,14 @@
              (when (and (> height (clim:bounding-rectangle-height overlayer))
                         scroll-bars
                         (not (typep overlay-tree 'clim:scroller-pane)))
-               (setf (overlay-pane overlayer) nil ; To clear the parent/child relationship
-                     (overlay-pane overlayer)
-                     (prog1 overlay
-                       (clim:scrolling (:scroll-bars scroll-bars) ; Now re-add with scroll-bars.
-                         overlay-tree)))
+               (setf
+                ;; Clear the parent/child relationship.
+                (overlay-pane overlayer) nil
+                (overlay-pane overlayer)
+                (prog1 overlay
+                  ;; Now re-add with scroll-bars.
+                  (clim:scrolling (:scroll-bars scroll-bars)
+                    overlay-tree)))
                ;; The overlayer has default space requirements now,
                ;; make it reevaluate its life.
                (clim:change-space-requirements overlayer)))))
@@ -517,15 +533,17 @@
         (with-typeout (menu :erase t :window associated-window)
           (when text-style
             (setf (clim:medium-text-style menu) text-style))
-          (esa-utils:letf (((clim:stream-default-view menu) clim:+textual-menu-view+))
-            (clim:menu-choose-from-drawer menu (or presentation-type 'typeout-menu-item)
-                                     #'drawer
-                                     :cache cache
-                                     :unique-id unique-id
-                                     :id-test id-test
-                                     :cache-value cache-value
-                                     :cache-test cache-test
-                                     :pointer-documentation pointer-documentation)))
+          (esa-utils:letf (((clim:stream-default-view menu)
+                            clim:+textual-menu-view+))
+            (clim:menu-choose-from-drawer
+             menu (or presentation-type 'typeout-menu-item)
+             #'drawer
+             :cache cache
+             :unique-id unique-id
+             :id-test id-test
+             :cache-value cache-value
+             :cache-test cache-test
+             :pointer-documentation pointer-documentation)))
       (unless (null event)             ; Event is NIL if user aborted.
         (let ((subitems (menu-item-option object :items 'menu-item-no-items)))
           (if (eq subitems 'menu-item-no-items)
