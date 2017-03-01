@@ -86,21 +86,24 @@
           (clim:replay (clim:stream-output-history pane) pane region)))
       (call-next-method)))
 
-(defmethod drei:display-drei-view-contents ((pane clim:pane) (view typeout-view))
+(defmethod drei:display-drei-view-contents
+    ((pane clim:pane) (view typeout-view))
   (when (or (dirty view)
             (not (eq (clim:output-record-parent (output-history view))
                      (clim:stream-output-history pane))))
     (clim:with-output-recording-options (pane :record nil :draw t)
-      (clim:with-bounding-rectangle* (x1 y1 x2 y2) (or (clim:pane-viewport-region pane)
-                                                  (clim:sheet-region pane))
+      (clim:with-bounding-rectangle* (x1 y1 x2 y2)
+                                     (or (clim:pane-viewport-region pane)
+                                         (clim:sheet-region pane))
         (clim:draw-rectangle* pane x1 y1 x2 y2 :ink clim:+background-ink+))
       (clim:replay-output-record (output-history view) pane
-                            (or (clim:pane-viewport-region pane)
-                                (clim:sheet-region pane))))
+                                 (or (clim:pane-viewport-region pane)
+                                     (clim:sheet-region pane))))
     (unless (eq (clim:output-record-parent (output-history view))
                 (clim:stream-output-history pane))
       (setf (clim:output-record-parent (output-history view)) nil)
-      (clim:add-output-record (output-history view) (clim:stream-output-history pane))))
+      (clim:add-output-record (output-history view)
+                              (clim:stream-output-history pane))))
   (setf (dirty view) nil))
 
 (defmethod clim:bounding-rectangle* ((view typeout-view))
@@ -116,14 +119,17 @@
     (unless (null viewport)            ; Can't scroll without viewport
       (multiple-value-bind (x-displacement y-displacement)
           (clim:transform-position (clim:sheet-transformation window) 0 0)
-        (clim:scroll-extent window
-                       (- x-displacement)
-                       (max 0 (min (+ (- y-displacement) y)
-                                   (- (clim:bounding-rectangle-height window)
-                                      (clim:bounding-rectangle-height viewport)))))))))
+        (clim:scroll-extent
+         window
+         (- x-displacement)
+         (max 0 (min (+ (- y-displacement) y)
+                     (- (clim:bounding-rectangle-height window)
+                        (clim:bounding-rectangle-height viewport)))))))))
 
 (defmethod drei:page-down ((pane clim:sheet) (view typeout-view))
-  (scroll-typeout-window pane (clim:bounding-rectangle-height (clim:pane-viewport pane))))
+  (let* ((viewport (clim:pane-viewport pane))
+         (height (clim:bounding-rectangle-height viewport)))
+    (scroll-typeout-window pane height)))
 
 (defmethod drei:page-up ((pane clim:sheet) (view typeout-view))
   (scroll-typeout-window
@@ -155,14 +161,15 @@
                                      (let ((pane (split-window t)))
                                        (setf (clim:view pane) typeout-view)
                                        pane))))
-    (let ((new-record (clim:with-output-to-output-record (pane-with-typeout-view)
-                        (clim:with-output-recording-options (pane-with-typeout-view :record t :draw nil)
-                          (when (last-cursor-position typeout-view)
-                            (setf (clim:stream-cursor-position pane-with-typeout-view)
-                                  (values-list (last-cursor-position typeout-view))))
-                          (funcall continuation pane-with-typeout-view)
-                          (setf (last-cursor-position typeout-view)
-                                (multiple-value-list (clim:stream-cursor-position pane-with-typeout-view)))))))
+    (let ((new-record
+            (clim:with-output-to-output-record (pane-with-typeout-view)
+              (clim:with-output-recording-options (pane-with-typeout-view :record t :draw nil)
+                (when (last-cursor-position typeout-view)
+                  (setf (clim:stream-cursor-position pane-with-typeout-view)
+                        (values-list (last-cursor-position typeout-view))))
+                (funcall continuation pane-with-typeout-view)
+                (setf (last-cursor-position typeout-view)
+                      (multiple-value-list (clim:stream-cursor-position pane-with-typeout-view)))))))
       (clim:add-output-record new-record (output-history typeout-view))
       (setf (dirty typeout-view) t)
       nil)))
@@ -180,7 +187,8 @@
 ;;; An implementation of the Gray streams protocol that uses a Climacs
 ;;; typeout view to draw the output.
 
-(defclass typeout-stream (trivial-gray-streams:fundamental-character-output-stream)
+(defclass typeout-stream
+    (trivial-gray-streams:fundamental-character-output-stream)
   ((%climacs :reader climacs-instance
              :initform (error "Must provide a Climacs instance for typeout streams")
              :initarg :climacs)
@@ -193,45 +201,45 @@
                   manually by the user, the stream will recreate it the~@
                   next time output is performed.")))
 
-(defmethod sb-gray:stream-write-char ((stream typeout-stream) char)
+(defmethod trivial-gray-streams:stream-write-char ((stream typeout-stream) char)
   (with-typeout-view (typeout (label stream))
-    (sb-gray:stream-write-char typeout char)))
+    (trivial-gray-streams:stream-write-char typeout char)))
 
-(defmethod sb-gray:stream-line-column ((stream typeout-stream))
+(defmethod trivial-gray-streams:stream-line-column ((stream typeout-stream))
   (with-typeout-view (typeout (label stream))
-    (sb-gray:stream-line-column typeout)))
+    (trivial-gray-streams:stream-line-column typeout)))
 
-(defmethod sb-gray:stream-start-line-p ((stream typeout-stream))
+(defmethod trivial-gray-streams:stream-start-line-p ((stream typeout-stream))
   (with-typeout-view (typeout (label stream))
-    (sb-gray:stream-start-line-p typeout)))
+    (trivial-gray-streams:stream-start-line-p typeout)))
 
-(defmethod sb-gray:stream-write-string ((stream typeout-stream) string &optional (start 0) end)
+(defmethod trivial-gray-streams:stream-write-string ((stream typeout-stream) string &optional (start 0) end)
   (with-typeout-view (typeout (label stream))
-    (sb-gray:stream-write-string typeout string start end)))
+    (trivial-gray-streams:stream-write-string typeout string start end)))
 
-(defmethod sb-gray:stream-terpri ((stream typeout-stream))
+(defmethod trivial-gray-streams:stream-terpri ((stream typeout-stream))
   (with-typeout-view (typeout (label stream))
-    (sb-gray:stream-terpri typeout)))
+    (trivial-gray-streams:stream-terpri typeout)))
 
-(defmethod sb-gray:stream-fresh-line ((stream typeout-stream))
+(defmethod trivial-gray-streams:stream-fresh-line ((stream typeout-stream))
   (with-typeout-view (typeout (label stream))
-    (sb-gray:stream-fresh-line typeout)))
+    (trivial-gray-streams:stream-fresh-line typeout)))
 
-(defmethod sb-gray:stream-finish-output ((stream typeout-stream))
+(defmethod trivial-gray-streams:stream-finish-output ((stream typeout-stream))
   (with-typeout-view (typeout (label stream))
-    (sb-gray:stream-finish-output typeout)))
+    (trivial-gray-streams:stream-finish-output typeout)))
 
-(defmethod sb-gray:stream-force-output ((stream typeout-stream))
+(defmethod trivial-gray-streams:stream-force-output ((stream typeout-stream))
   (with-typeout-view (typeout (label stream))
-    (sb-gray:stream-force-output typeout)))
+    (trivial-gray-streams:stream-force-output typeout)))
 
-(defmethod sb-gray:stream-clear-output ((stream typeout-stream))
+(defmethod trivial-gray-streams:stream-clear-output ((stream typeout-stream))
   (with-typeout-view (typeout (label stream))
-    (sb-gray:stream-clear-output typeout)))
+    (trivial-gray-streams:stream-clear-output typeout)))
 
-(defmethod sb-gray:stream-advance-to-column ((stream typeout-stream) (column integer))
+(defmethod trivial-gray-streams:stream-advance-to-column ((stream typeout-stream) (column integer))
   (with-typeout-view (typeout (label stream))
-    (sb-gray:stream-advance-to-column typeout column)))
+    (trivial-gray-streams:stream-advance-to-column typeout column)))
 
 (defmethod clim-lisp-patch:interactive-stream-p ((stream typeout-stream))
   (with-typeout-view (typeout (label stream))
