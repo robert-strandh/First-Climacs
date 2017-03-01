@@ -241,9 +241,9 @@
   (with-typeout-view (typeout (label stream))
     (trivial-gray-streams:stream-advance-to-column typeout column)))
 
-(defmethod clim-lisp-patch:interactive-stream-p ((stream typeout-stream))
+(defmethod interactive-stream-p ((stream typeout-stream))
   (with-typeout-view (typeout (label stream))
-    (clim-lisp-patch:interactive-stream-p typeout)))
+    (interactive-stream-p typeout)))
 
 (defun make-typeout-stream (climacs label)
   (make-instance 'typeout-stream :climacs climacs :label label))
