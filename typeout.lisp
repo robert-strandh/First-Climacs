@@ -109,9 +109,9 @@
       (values 0 0 0 0)))
 
 (defun scroll-typeout-window (window y)
-  "Scroll `window' down by `y' device units, but taking care not
-to scroll past the size of `window'. If `window' does not have a
-viewport, do nothing."
+  #.(format nil "Scroll WINDOW down by `y' device units, but taking~@
+                 care not to scroll past the size of WINDOW. If WINDOW~@
+                 does not have a viewport, do nothing.")
   (let ((viewport (pane-viewport window)))
     (unless (null viewport)            ; Can't scroll without viewport
       (multiple-value-bind (x-displacement y-displacement)
@@ -130,9 +130,9 @@ viewport, do nothing."
    pane (- (bounding-rectangle-height (pane-viewport pane)))))
 
 (defun ensure-typeout-view (climacs label erase)
-  "Ensure that `climacs' has a typeout view with the name
-`label', and return that view. If `erase' is true, clear any
-already existing typeout view by that name first."
+  #.(format nil "Ensure that CLIMACS has a typeout view with the name~@
+                 LABEL, and return that view. If ERASE is true, clear any~@
+                 already existing typeout view by that name first.")
   (check-type label string)
   (or (let ((view (find-if #'(lambda (view)
                                (and (typeout-view-p view)
@@ -187,10 +187,11 @@ already existing typeout view by that name first."
    (%label :reader label
            :initform (error "A typeout stream must have a label")
            :initarg :label))
-  (:documentation "An output stream that performs output on
-a (single) Climacs typeout pane. If the typeout pane is deleted
-manually by the user, the stream will recreate it the next time
-output is performed."))
+  (:documentation
+   #.(format nil "An output stream that performs output on a (single)~@
+                  Climacs typeout pane. If the typeout pane is deleted~@
+                  manually by the user, the stream will recreate it the~@
+                  next time output is performed.")))
 
 (defmethod stream-write-char ((stream typeout-stream) char)
   (with-typeout-view (typeout (label stream))
@@ -247,30 +248,34 @@ output is performed."))
   ((%overlay-pane :accessor overlay-pane
                   :initform nil
                   :type (or null pane)
-                  :documentation "The overlay pane. When this is
-set, the overlay tree will be updated.")
+                  :documentation
+                  #.(format nil "The overlay pane. When this is set,~@
+                                 the overlay tree will be updated."))
    (%overlay-tree :accessor overlay-tree
                   :initform nil
                   :type (or null pane)
-                  :documentation "The pane hierarchy containing
-the overlay pane. Should not be changed manually, will be updated
-when the overlay-pane is set.")
+                  :documentation
+                  #.(format nil "The pane hierarchy containing the  overlay~@
+                                 pane. Should not be changed manually, will~@
+                                 be updated when the overlay-pane is set."))
    (%content-pane :reader content-pane
                   :initform (error "A content-pane must be provided")
                   :type pane
                   :initarg :contents
-                  :documentation "The pane containing the usually
-displayed contents."))
-  (:documentation "This layout pane facilitates the addition and
-removal of an overlay pane positioned at the top of the
-`overlaying-pane' that will obscure the contents. For ease of
-use, the overlay-pane and the pane hierarchy containing this pane
-are handled seperately."))
+                  :documentation
+                  #.(format nil "The pane containing the usually~@
+                                 displayed contents.")))
+  (:documentation
+   #.(format nil "This layout pane facilitates the addition and removal~@
+                  of an overlay pane positioned at the top of the~@
+                  OVERLAYING-PANE that will obscure the contents.~@
+                  For ease of use, the overlay-pane and the pane hierarchy~@
+                  containing this pane are handled seperately.")))
 
 (defun find-topmost-parent (sheet)
-  "Find the topmost parent of `sheet', that is the parent of
-`sheet' (or `sheet' itself) that does not have a sheet parent or
-has a graft parent."
+  #.(format nil "Find the topmost parent of SHEET, that is the parent of~@
+                 SHEET (or SHEET itself) that does not have a sheet parent~@
+                 or has a graft parent.")
   (if (or (not (sheetp (sheet-parent sheet)))
           (typep (sheet-parent sheet) 'graft))
       sheet
@@ -306,9 +311,9 @@ has a graft parent."
   (apply #'compose-space (content-pane pane) args))
 
 (defmacro overlaying ((&rest options) &body contents)
-  "Create an overlaying pane with `contents' arranged vertically
-as the contents of the overlaying pane. There will be no initial
-overlay."
+  #.(format nil "Create an overlaying pane with CONTENTS arranged~@
+                 vertically as the contents of the overlaying pane.~@
+                 There will be no initial overlay.")
   `(make-pane 'overlaying-pane ,@options :contents (vertically () ,@contents)))
 
 (defun pane-overlayer (pane)
@@ -319,8 +324,8 @@ overlay."
         (pane-overlayer (sheet-parent pane)))))
 
 (defun add-typeout (&optional (pane (esa:current-window)))
-  "Return the typeout overlay of `pane', creating one if it
-doesn't exist."
+  #.(format nil "Return the typeout overlay of PANE,~@
+                 creating one if it doesn't exist.")
   (with-look-and-feel-realization
       ((frame-manager (pane-frame pane)) (pane-frame pane))
     (let ((overlayer (pane-overlayer pane)))
@@ -333,8 +338,8 @@ doesn't exist."
             (setf (overlay-pane overlayer) overlay))))))
 
 (defun remove-typeout (&optional (pane (esa:current-window)))
-  "Remove the typeout overlay of `pane', defaulting to the
-current window."
+  #.(format nil "Remove the typeout overlay of PANE, defaulting to~@
+                 the current window.")
   (setf (overlay-pane (pane-overlayer pane)) nil))
 
 (defclass typeout-overlay (clim-stream-pane)
@@ -343,10 +348,12 @@ current window."
                      :scroll-bars nil))
 
 (defun invoke-with-typeout (pane continuation &key erase)
-  "Invoke `continuation' with a single argument - a typeout
-overlay for `pane'. If `erase' is true, the typeout overlay will
-be newly created, and any old overlay will have been deleted."
-  (with-look-and-feel-realization ((frame-manager (pane-frame pane)) (pane-frame pane))
+  #.(format nil "Invoke CONTINUATION with a single argument - a typeout~@
+                 overlay for PANE. If ERASE is true, the typeout~@
+                 overlay will be newly created, and any old overlay will~@
+                 have been deleted.")
+  (with-look-and-feel-realization
+      ((frame-manager (pane-frame pane)) (pane-frame pane))
     (when erase (remove-typeout pane))
     (let* ((typeout (add-typeout pane)))
       ;; Expand the typeout to the proper width...
@@ -359,9 +366,10 @@ be newly created, and any old overlay will have been deleted."
 (defmacro with-typeout
     ((stream &rest args &key erase (window (esa:current-window)))
      &body body)
-  "Evaluate `body' with `stream' bound to a typeout overlay for
-`window'. If `erase' is true, the typeout overlay will be newly
-created, and any old overlay will have been deleted."
+  #.(format nil "Evaluate BODY with STREAM bound to a typeout~@
+                 overlay for WINDOW. If ERASE is true, the~@
+                 typeout overlay will be newly created, and any~@
+                 old overlay will have been deleted.")
   (declare (ignore erase))
   (with-keywords-removed (args (:window))
     `(invoke-with-typeout ,window
@@ -378,20 +386,22 @@ created, and any old overlay will have been deleted."
     :reader standard-frame-manager
     :initform (find-frame-manager)
     :type frame-manager
-    :documentation "The frame manager that this
-`climacs-frame-manager' dispatches functions to."
+    :documentation
+    #.(format nil "The frame manager that this CLIMACS-FRAME-MANAGER~@
+                   dispatches functions to.")
     :initarg :standard-frame-manager))
-  (:documentation "This class thinly wraps another frame manager
-instance and delegates most frame managing to this other
-manager. It is used to implement Climacs \"look and feel\" where
-appropriate."))
+  (:documentation
+   #.(format nil "This class thinly wraps another frame manager instance~@
+                  and delegates most frame managing to this other manager.~@
+                  It is used to implement Climacs \"look and feel\" where~@
+                  appropriate.")))
 
 ;;; A simple dispatching implementation of the frame manager protocol.
 
 (defmacro define-dispatching-fun (name (frame-manager-arg &rest args))
-  "Defines a dispatching function for the frame manager protocol
-for `climacs-frame-manager'. Will assume that `frame-manager-arg'
-is the frame manager."
+  #.(format nil "Defines a dispatching function for the frame manager~@
+                 protocol for CLIMACS-FRAME-MANAGER. Will assume that~@
+                 FRAME-MANAGER-ARG is the frame manager.")
   `(defmethod ,name ((,frame-manager-arg climacs-frame-manager) ,@args)
      (when (standard-frame-manager ,frame-manager-arg)
        (,name (standard-frame-manager ,frame-manager-arg) ,@args))))
