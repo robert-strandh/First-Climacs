@@ -4,5 +4,6 @@
   :depends-on (:first-climacs)
   :serial t
   :components
-  ((:file "c-syntax")
+  ((:file "packages")
+   (:file "c-syntax")
    (:file "c-syntax-commands")))
