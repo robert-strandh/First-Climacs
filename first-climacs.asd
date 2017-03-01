@@ -28,7 +28,6 @@
   :components
   ((:file "packages")
    (:file "text-syntax")
-   ;; (:file "cl-syntax")
    (:file "typeout")
    (:file "gui")
    (:file "core")
