@@ -51,7 +51,4 @@
    (:file "c-syntax")
    (:file "c-syntax-commands")
    (:file "java-syntax")
-   (:file "java-syntax-commands")
-   ;; (:file "slidemacs")
-   ;; (:file "slidemacs-gui")
-   ))
+   (:file "java-syntax-commands")))
