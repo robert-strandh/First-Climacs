@@ -70,7 +70,8 @@
                  :key #'view)))
     (when window (window-clear window))))
 
-(defmethod handle-redisplay ((pane drei-pane) (view typeout-view) (region region))
+(defmethod handle-redisplay
+    ((pane drei-pane) (view typeout-view) (region region))
   (if (and (not (dirty view))
            (eq (output-record-parent (output-history view))
                (stream-output-history pane)))
@@ -80,7 +81,8 @@
                           (bounding-rectangle region))))
           (with-bounding-rectangle* (x1 y1 x2 y2) region
             (with-output-recording-options (pane :record nil)
-              (draw-rectangle* pane x1 y1 x2 y2 :filled t :ink +background-ink+)))
+              (draw-rectangle* pane x1 y1 x2 y2
+                               :filled t :ink +background-ink+)))
           (replay (stream-output-history pane) pane region)))
       (call-next-method)))
 
@@ -143,10 +145,10 @@ already existing typeout view by that name first."
 
 ;; Because specialising on the type of `climacs' is so useful...
 (defun invoke-with-typeout-view (climacs label erase continuation)
-  "Call `continuation' with a single argument, a
-stream meant for typeout. `Climacs' is the Climacs instance in
-which the typeout pane should be shown, and `label' is the name
-of the created typeout view. Returns NIL."
+  #.(format nil "Call CONTINUATION with a single argument, a stream~@
+                 meant for typeout. CLIMACS is the Climacs instance in~@
+                 which the typeout pane should be shown, and LABEL is~@
+                 the name of the created typeout view. Returns NIL.")
   (let* ((typeout-view (ensure-typeout-view climacs label erase))
          (pane-with-typeout-view (or (find typeout-view (esa:windows climacs)
                                       :key #'view)
@@ -167,10 +169,10 @@ of the created typeout view. Returns NIL."
 
 (defmacro with-typeout-view ((stream &optional (label "Typeout") erase)
                              &body body)
-  "Evaluate `body' with `stream' bound to a stream that can be
-used for typeout. `Label' is the name of the created typeout
-view. If `erase' is true, clear the contents of any existing
-typeout view with that name."
+  #.(format nil "Evaluate BODY with STREAM bound to a stream that can be~@
+                 used for typeout. LABEL is the name of the created typeout~@
+                 view. If ERASE is true, clear the contents of any existing~@
+                 typeout view with that name.")
   `(invoke-with-typeout-view esa:*esa-instance* ,label ,erase
                              #'(lambda (,stream)
                                  ,@body)))
@@ -432,7 +434,7 @@ is the frame manager."
   (let ((*pointer-documentation-output* pointer-documentation))
     (handler-case
         (with-input-context (`(or ,presentation-type blank-area) :override t)
-            (object type event) 
+            (object type event)
             (prog1 nil (loop for gesture = (read-gesture :stream menu :peek-p t)
                              until (or (and (typep gesture 'keyboard-event)
                                             (keyboard-event-character gesture))
