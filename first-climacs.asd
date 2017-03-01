@@ -30,8 +30,6 @@
    (:file "text-syntax")
    ;; (:file "cl-syntax")
    ;; (:file "html-syntax")
-   (:file "prolog-syntax")
-   (:file "prolog2paiprolog")
    (:file "typeout")
    (:file "gui")
    (:file "core")
