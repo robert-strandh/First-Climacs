@@ -164,10 +164,6 @@
   command definitions, as well as some useful automatic
   command-defining facilities."))
 
-(defpackage #:climacs-html-syntax
-  (:use :clim-lisp :clim :drei-buffer :drei-base
-	:drei-syntax :flexichain :drei :drei-fundamental-syntax))
-
 (defpackage #:climacs-text-syntax
   (:use :clim-lisp :clim :drei-buffer :drei-base
 	:drei-syntax :flexichain :drei :drei-fundamental-syntax
