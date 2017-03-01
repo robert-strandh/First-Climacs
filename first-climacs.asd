@@ -29,7 +29,6 @@
   ((:file "packages")
    (:file "text-syntax")
    ;; (:file "cl-syntax")
-   ;; (:file "html-syntax")
    (:file "typeout")
    (:file "gui")
    (:file "core")
