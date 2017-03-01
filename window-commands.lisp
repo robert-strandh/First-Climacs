@@ -50,8 +50,8 @@ clone of `(current-view)' for the new window."
   (split-window-maybe-cloning t clone-current-view))
 
 (set-key `(com-split-window-vertically ,*numeric-argument-marker*)
-	 'window-table
-	 '((#\x :control) (#\2)))
+         'window-table
+         '((#\x :control) (#\2)))
 
 (define-command (com-split-window-horizontally :name t
                                                :command-table window-table)
@@ -59,15 +59,15 @@ clone of `(current-view)' for the new window."
   (split-window-maybe-cloning nil clone-current-view))
 
 (set-key `(com-split-window-horizontally ,*numeric-argument-marker*)
-	 'window-table
-	 '((#\x :control) (#\3)))
+         'window-table
+         '((#\x :control) (#\3)))
 
 (define-command (com-other-window :name t :command-table window-table) ()
   (other-window))
 
 (set-key 'com-other-window
-	 'window-table
-	 '((#\x :control) (#\o)))
+         'window-table
+         '((#\x :control) (#\o)))
 
 (defun click-to-offset (window x y)
   (with-accessors ((top top) (bot bot)) (view window)
@@ -93,7 +93,7 @@ clone of `(current-view)' for the new window."
   (when (and (buffer-pane-p window)
              (typep (view window) 'point-mark-view))
     (setf (offset (point (view window)))
-	  (click-to-offset window x y))))
+          (click-to-offset window x y))))
 
 (define-presentation-to-command-translator blank-area-to-switch-to-this-window
     (blank-area com-switch-to-this-window window-table
@@ -106,9 +106,9 @@ clone of `(current-view)' for the new window."
 (define-command (com-mouse-save :name nil :command-table window-table)
     ((window 'pane) (x 'integer) (y 'integer))
   (when (and (buffer-pane-p window)
-	     (eq window (current-window)))
+             (eq window (current-window)))
     (setf (offset (mark (view window)))
-	  (click-to-offset window x y))
+          (click-to-offset window x y))
     (drei-commands::com-exchange-point-and-mark)
     (drei-commands::com-copy-region)))
 
@@ -124,7 +124,7 @@ clone of `(current-view)' for the new window."
   (when (buffer-pane-p window)
     (other-window window)
     (setf (offset (point (view window)))
-	  (click-to-offset window x y))
+          (click-to-offset window x y))
     (drei-commands::com-yank)))
 
 (define-presentation-to-command-translator blank-area-to-yank-here
@@ -134,17 +134,17 @@ clone of `(current-view)' for the new window."
 
 (defun single-window ()
   (loop until (null (cdr (windows *application-frame*)))
-	do (rotatef (car (windows *application-frame*))
-		    (cadr (windows *application-frame*)))
-	   (com-delete-window))
+        do (rotatef (car (windows *application-frame*))
+                    (cadr (windows *application-frame*)))
+           (com-delete-window))
   (setf *standard-output* (car (windows *application-frame*))))
 
 (define-command (com-single-window :name t :command-table window-table) ()
   (single-window))
 
 (set-key 'com-single-window
-	 'window-table
-	 '((#\x :control) (#\1)))
+         'window-table
+         '((#\x :control) (#\1)))
 
 (define-command (com-scroll-other-window :name t :command-table window-table) ()
   (let ((other-window (second (windows *application-frame*))))
@@ -152,8 +152,8 @@ clone of `(current-view)' for the new window."
       (page-down other-window (view other-window)))))
 
 (set-key 'com-scroll-other-window
-	 'window-table
-	 '((#\v :control :meta)))
+         'window-table
+         '((#\v :control :meta)))
 
 (define-command (com-scroll-other-window-up :name t :command-table window-table) ()
   (let ((other-window (second (windows *application-frame*))))
@@ -161,15 +161,15 @@ clone of `(current-view)' for the new window."
       (page-up other-window (view other-window)))))
 
 (set-key 'com-scroll-other-window-up
-	 'window-table
-	 '((#\V :control :meta)))
+         'window-table
+         '((#\V :control :meta)))
 
 (define-command (com-delete-window :name t :command-table window-table) ()
   (delete-window))
 
 (set-key 'com-delete-window
-	 'window-table
-	 '((#\x :control) (#\0)))
+         'window-table
+         '((#\x :control) (#\0)))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; 
@@ -189,8 +189,8 @@ view (if any) as a default."
       (other-window (window condition)))))
 
 (set-key `(com-switch-to-view ,*unsupplied-argument-marker*)
-	 'window-table
-	 '((#\x :control) (#\b)))
+         'window-table
+         '((#\x :control) (#\b)))
 
 (define-command (com-kill-view :name t :command-table window-table)
     ((view 'view :prompt "Kill view"
@@ -202,8 +202,8 @@ as a default."
   (kill-view view))
 
 (set-key `(com-kill-view ,*unsupplied-argument-marker*)
-	 'window-table
-	 '((#\x :control) (#\k)))
+         'window-table
+         '((#\x :control) (#\k)))
 
 (define-menu-table window-menu-table (window-table)
   '(com-split-window-vertically nil)
