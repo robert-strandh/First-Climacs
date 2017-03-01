@@ -145,48 +145,49 @@
 
 (defun show-note-counts (notes &optional seconds)
   (loop with nerrors = 0
-     with nwarnings = 0
-     with nstyle-warnings = 0
-     with nnotes = 0
-     for note in notes
-     do (etypecase note
-          (error-compiler-note (incf nerrors))
-          (read-error-compiler-note (incf nerrors))
-          (warning-compiler-note (incf nwarnings))
-          (style-warning-compiler-note (incf nstyle-warnings))
-          (note-compiler-note (incf nnotes)))
-     finally
-     (esa:display-message "Compilation finished: ~D error~:P ~
-                            ~D warning~:P ~D style-warning~:P ~D note~:P ~
-                            ~@[[~D secs]~]"
-                          nerrors nwarnings nstyle-warnings nnotes seconds)))
+        with nwarnings = 0
+        with nstyle-warnings = 0
+        with nnotes = 0
+        for note in notes
+        do (etypecase note
+             (error-compiler-note (incf nerrors))
+             (read-error-compiler-note (incf nerrors))
+             (warning-compiler-note (incf nwarnings))
+             (style-warning-compiler-note (incf nstyle-warnings))
+             (note-compiler-note (incf nnotes)))
+        finally
+           (esa:display-message
+            "Compilation finished: ~D error~:P ~
+             ~D warning~:P ~D style-warning~:P ~D note~:P ~
+             ~@[[~D secs]~]"
+            nerrors nwarnings nstyle-warnings nnotes seconds)))
 
 (defun one-line-ify (string)
   "Return a single-line version of STRING.
 Each newline and following whitespace is replaced by a single space."
   (loop with count = 0
-     while (< count (length string))
-     with new-string = (make-array 0 :element-type 'character :adjustable t
-                                   :fill-pointer 0)
-     when (char= (char string count) #\Newline)
-     do (loop while (and (< count (length string))
-                         (whitespacep (current-syntax) (char string count)))
-           do (incf count)
-           ;; Just ignore whitespace if it is last in the
-           ;; string.
-           finally (when (< count (length string))
-                     (vector-push-extend #\Space new-string)))
-     else
-     do (vector-push-extend (char string count) new-string)
-     (incf count)
-     finally (return new-string)))
+        while (< count (length string))
+        with new-string = (make-array 0 :element-type 'character :adjustable t
+                                        :fill-pointer 0)
+        when (char= (char string count) #\Newline)
+          do (loop while (and (< count (length string))
+                              (whitespacep (current-syntax) (char string count)))
+                   do (incf count)
+                      ;; Just ignore whitespace if it is last in the
+                      ;; string.
+                   finally (when (< count (length string))
+                             (vector-push-extend #\Space new-string)))
+        else
+          do (vector-push-extend (char string count) new-string)
+             (incf count)
+        finally (return new-string)))
 
 (defgeneric print-for-menu (object stream))
 
 (defun print-note-for-menu (note stream severity ink)
   (with-accessors ((message message) (short-message short-message)) note
-    (with-drawing-options (stream :ink ink
-                                  :text-style (make-text-style :sans-serif :italic nil))
+    (with-drawing-options
+        (stream :ink ink :text-style (make-text-style :sans-serif :italic nil))
       (princ severity stream)
       (princ " " stream))
     (princ (if short-message
@@ -205,15 +206,17 @@ Each newline and following whitespace is replaced by a single space."
 (def-print-for-menu note-compiler-note "Note" +brown+)
 
 (defun show-notes (notes view-name definition)
-  (climacs1-gui:with-typeout-view (stream (format nil "Compiler Notes: ~A ~A" view-name definition))
+  (climacs1-gui:with-typeout-view
+      (stream (format nil "Compiler Notes: ~A ~A" view-name definition))
     (loop for note in notes
-       do (with-output-as-presentation (stream note 'compiler-note)
-            (print-for-menu note stream))
-       (terpri stream)
-       count note into length
-       finally (change-space-requirements stream
-                :height (* length (stream-line-height stream)))
-       (scroll-extent stream 0 0))))
+          do (with-output-as-presentation (stream note 'compiler-note)
+               (print-for-menu note stream))
+             (terpri stream)
+          count note into length
+          finally (change-space-requirements
+                   stream
+                   :height (* length (stream-line-height stream)))
+                  (scroll-extent stream 0 0))))
 
 (defgeneric goto-location (location))
 
@@ -358,10 +361,12 @@ macros or similar). If no such form can be found, return NIL."
            (find-local-binding (form)
              (when form
                (or (when (locally-binding-p form)
-                     (loop for binding in (form-children (first (form-operands form)))
-                        when (and (form-list-p binding)
-                                  (match (form-operator binding)))
-                        return binding))
+                     (loop with operands = (form-operands form)
+                           with children = (form-children (first operands))
+                           for binding in children
+                           when (and (form-list-p binding)
+                                     (match (form-operator binding)))
+                             return binding))
                    (unless (form-at-top-level-p form)
                      (find-local-binding (parent form)))))))
     (find-local-binding (list-at-mark syntax (start-offset symbol-form)))))
@@ -408,7 +413,7 @@ macros or similar). If no such form can be found, return NIL."
 
 (defun show-definitions (name definitions)
   (show-xrefs (loop for xref-list in definitions
-                 collect (make-xref xref-list))
+                    collect (make-xref xref-list))
               'definition name))
 
 (defun show-xrefs (xrefs type symbol)
@@ -422,13 +427,14 @@ macros or similar). If no such form can be found, return NIL."
                     (princ (dspec item) stream))))
            (climacs1-gui:with-typeout-view (stream (format-sym "~A ~A" type symbol))
              (loop for xref in xrefs
-                do (with-output-as-presentation (stream xref 'xref)
-                     (printer xref stream))
-                (terpri stream)
-                count xref into length
-                finally (change-space-requirements stream
-                         :height (* length (stream-line-height stream)))
-                (scroll-extent stream 0 0)))))))
+                   do (with-output-as-presentation (stream xref 'xref)
+                        (printer xref stream))
+                      (terpri stream)
+                   count xref into length
+                   finally (change-space-requirements
+                            stream
+                            :height (* length (stream-line-height stream)))
+                           (scroll-extent stream 0 0)))))))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;
