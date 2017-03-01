@@ -169,11 +169,6 @@
 	:drei-syntax :flexichain :drei :drei-fundamental-syntax
         :esa-utils))
 
-(defpackage #:climacs-cl-syntax
-  (:use :clim-lisp :clim :drei-buffer :drei-base
-	:drei-syntax :flexichain :drei :drei-fundamental-syntax)
-  (:export))
-
 (defpackage #:climacs-structedit
   (:use :common-lisp)
   (:shadow clim:form)
