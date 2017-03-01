@@ -29,23 +29,29 @@
 ;;; Typeout views.
 
 (defclass typeout-view (drei-view textual-view)
-  ((%output-history :accessor output-history
-                    :initform (make-instance 'standard-tree-output-record)
-                    :initarg :output-history
-                    :documentation "The output record history
-that will be replayed whenever the views contents are shown.")
-   (%dirty :accessor dirty
-           :initform t
-           :documentation "This value indicates whether the
-output has changed since it was last replayed.")
-   (%cursor-position :accessor last-cursor-position
-                     :initform nil
-                     :documentation "A list (X Y) specifying
-where drawing ended the last time, and where it should start the
-next time. If NIL, no previous position has been recorded."))
+  ((%output-history
+    :accessor output-history
+    :initform (make-instance 'standard-tree-output-record)
+    :initarg :output-history
+    :documentation
+    #.(format nil "The output record history that will be replayed~@
+                   whenever the views contents are shown."))
+   (%dirty
+    :accessor dirty
+    :initform t
+    :documentation
+    #.(format nil "This value indicates whether the output has~@
+                   changed since it was last replayed."))
+   (%cursor-position
+    :accessor last-cursor-position
+    :initform nil
+    :documentation
+    #.(format nil "A list (X Y) specifying where drawing ended the last ~@
+                   time, and where it should start the next time. If NIL,~@
+                   no previous position has been recorded.")))
   (:metaclass modual-class)
-  (:documentation "A noneditable Drei view displaying an output
-record history."))
+  (:documentation #.(format nil "A noneditable Drei view displaying an~@
+                                 output record history.")))
 
 (defun typeout-view-p (view)
   "Return true if `view' is a typeout view, false otherwise."
