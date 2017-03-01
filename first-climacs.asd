@@ -32,7 +32,6 @@
    ;; (:file "html-syntax")
    (:file "prolog-syntax")
    (:file "prolog2paiprolog")
-   ;; (:file "ttcn3-syntax")
    (:file "typeout")
    (:file "gui")
    (:file "core")
