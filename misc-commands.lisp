@@ -24,45 +24,45 @@
 ;;; Free Software Foundation, Inc., 59 Temple Place - Suite 330,
 ;;; Boston, MA  02111-1307  USA.
 
-;;; miscellaneous commands for the Climacs editor. 
+;;; miscellaneous commands for the Climacs editor.
 
 (cl:in-package #:climacs-commands)
 
 (define-command (com-not-modified :name t :command-table buffer-table) ()
   "Clear the modified flag for the current buffer.
-The modified flag is automatically set when the contents 
-of the buffer are changed. This flag is consulted, for instance, 
+The modified flag is automatically set when the contents
+of the buffer are changed. This flag is consulted, for instance,
 when deciding whether to prompt you to save the buffer before killing it."
   (setf (needs-saving (current-buffer)) nil))
 
 (set-key 'com-not-modified
-	 'buffer-table
-	 '((#\~ :meta)))
+         'buffer-table
+         '((#\~ :meta)))
 
 (define-command (com-what-cursor-position :name t :command-table info-table) ()
   "Print information about point.
-Gives the character after point (name and octal, decimal and hexidecimal charcode), 
-the offset of point, the total objects in the buffer, 
+Gives the character after point (name and octal, decimal and hexidecimal charcode),
+the offset of point, the total objects in the buffer,
 and the percentage of the buffers objects before point.
 
 FIXME: gives no information at end of buffer."
   (let* ((char (or (end-of-buffer-p (point)) (object-after (point))))
-	 (column (column-number (point))))
+         (column (column-number (point))))
     (display-message "Char: ~:[none~*~;~:*~:C (#o~O ~:*~D ~:*#x~X)~] point=~D of ~D (~D%) column ~D"
-		     (and (characterp char) char)
-		     (and (characterp char) (char-code char))
-		     (offset (point)) (size (current-buffer))
-		     (if (size (current-buffer))
+                     (and (characterp char) char)
+                     (and (characterp char) (char-code char))
+                     (offset (point)) (size (current-buffer))
+                     (if (size (current-buffer))
                          (round (* 100 (/ (offset (point))
                                           (size (current-buffer)))))
                          100)
-		     column)))
+                     column)))
 
 (set-key 'com-what-cursor-position
-	 'info-table
-	 '((#\x :control) (#\=)))
+         'info-table
+         '((#\x :control) (#\=)))
 
-(define-command (com-browse-url :name t :command-table base-table) 
+(define-command (com-browse-url :name t :command-table base-table)
     ((url 'url :prompt "Browse URL"))
   (declare (ignorable url))
   #+ (and sbcl darwin)
@@ -70,7 +70,7 @@ FIXME: gives no information at end of buffer."
   #+ (and openmcl darwin)
      (ccl:run-program "/usr/bin/open" `(,url) :wait nil))
 
-(define-command (com-set-syntax :name t :command-table buffer-table) 
+(define-command (com-set-syntax :name t :command-table buffer-table)
     ((syntax 'syntax
       :prompt "Name of syntax"))
   "Prompts for a syntax to set for the current buffer.
@@ -78,7 +78,7 @@ FIXME: gives no information at end of buffer."
   (set-syntax (current-view) syntax))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;; 
+;;;
 ;;; Groups
 
 (define-command (com-define-group :name t :command-table global-climacs-table)
