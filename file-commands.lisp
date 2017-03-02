@@ -31,41 +31,45 @@
 (clim:define-command
     (com-reparse-attribute-list :name t :command-table climacs1-gui:buffer-table)
     ()
-  "Reparse the current buffer's attribute list.
-An attribute list is a line of keyword-value pairs, each keyword separated
-from the corresponding value by a colon. If another keyword-value pair
-follows, the value should be terminated by a colon. The attribute list
-is surrounded by '-*-' sequences, but the opening '-*-' need not be at the
-beginning of the line. Climacs looks for the attribute list
-on the first or second non-blank line of the file.
-
-An example attribute-list is:
-
-;; -*- Syntax: Lisp; Base: 10 -*- "
+  #.(format nil "Reparse the current buffer's attribute list.~@
+                 An attribute list is a line of keyword-value pairs,~@
+                 each keyword separated from the corresponding value~@
+                 by a colon. If another keyword-value pair follows,~@
+                 the value should be terminated by a colon. The~@
+                 attribute list is surrounded by '-*-' sequences,~@
+                 but the opening '-*-' need not be at the beginning of~@
+                 the line. Climacs looks for the attribute list on the~@
+                 first or second non-blank line of the file.~@
+                 ~@
+                 An example attribute-list is:~@
+                 ~@
+                 ;; -*- Syntax: Lisp; Base: 10 -*- ")
   (climacs-core:evaluate-attribute-line (esa:current-buffer)))
 
 (clim:define-command (com-update-attribute-list
                       :name t
                       :command-table climacs1-gui:buffer-table)
     ()
-  "Update the current buffers attribute list to reflect the
-settings of the syntax of the buffer.
-
-After the attribute list has been updated, it will also be
-re-evaluated. An attribute list is a line of keyword-value pairs,
-each keyword separated from the corresponding value by a
-colon. If another keyword-value pair follows, the value should be
-terminated by a colon. The attribute list is surrounded by '-*-'
-sequences, but the opening '-*-' need not be at the beginning of
-the line. Climacs looks for the attribute list on the first or
-second non-blank line of the file.
-
-An example attribute-list is:
-
-;; -*- Syntax: Lisp; Base: 10 -*-
-
-This command automatically comments the attribute line as
-appropriate for the syntax of the buffer."
+  #.(format nil "Update the current buffers attribute list to~@
+                 reflect the settings of the syntax of the buffer.~@
+                 ~@
+                 After the attribute list has been updated, it will~@
+                 also be re-evaluated. An attribute list is a line~@
+                 of keyword-value pairs, each keyword separated from~@
+                 the corresponding value by a colon. If another~@
+                 keyword-value pair follows, the value should be~@
+                 terminated by a colon. The attribute list is~@
+                 surrounded by '-*-' sequences, but the opening '-*-'~@
+                 need not be at the beginning of the line. Climacs~@
+                 looks for the attribute list on the first or second~@
+                  non-blank line of the file.~@
+                 ~@
+                 An example attribute-list is:~@
+                 ~@
+                 ;; -*- Syntax: Lisp; Base: 10 -*-~@
+                 ~@
+                 This command automatically comments the attribute line~@
+                 as appropriate for the syntax of the buffer.")
   (climacs-core:update-attribute-line (esa:current-buffer))
   (climacs-core:evaluate-attribute-line (esa:current-buffer)))
 
@@ -76,8 +80,8 @@ appropriate for the syntax of the buffer."
                :default (climacs-core:directory-of-buffer (esa:current-buffer))
                :default-type 'pathname
                :insert-default t))
-  "Prompt for a filename and insert its contents at point.
-Leaves mark after the inserted contents."
+  #.(format nil "Prompt for a filename and insert its contents at point.~@
+                 Leaves mark after the inserted contents.")
   (when (probe-file filename)
     (setf (drei-buffer:mark (drei:current-view))
           (drei-buffer:clone-mark (drei:point) :left))
@@ -98,8 +102,8 @@ Leaves mark after the inserted contents."
 (clim:define-command
     (com-revert-buffer :name t :command-table climacs1-gui:buffer-table)
     ()
-  "Replace the contents of the current buffer with the visited file.
-Signals an error if the file does not exist."
+  #.(format nil "Replace the contents of the current buffer with the visited~@
+                 file. Signals an error if the file does not exist.")
   (let* ((save (drei-buffer:offset (drei:point)))
          (filepath (esa-buffer:filepath (esa:current-buffer))))
     (when (clim:accept 'boolean
@@ -139,8 +143,8 @@ Signals an error if the file does not exist."
 (clim:define-command
     (com-load-file :name t :command-table climacs1-gui:base-table)
     ()
-  "Prompt for a filename and CL:LOAD that file.
-Signals and error if the file does not exist."
+  #.(format nil "Prompt for a filename and CL:LOAD that file.~@
+                 Signals and error if the file does not exist.")
   (let ((filepath (clim:accept 'pathname :prompt "Load File")))
     (load-file filepath)))
 
