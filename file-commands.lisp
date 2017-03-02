@@ -28,7 +28,7 @@
 
 (cl:in-package #:climacs-commands)
 
-(define-command (com-reparse-attribute-list :name t :command-table buffer-table)
+(clim:define-command (com-reparse-attribute-list :name t :command-table climacs1-gui:buffer-table)
     ()
   "Reparse the current buffer's attribute list.
 An attribute list is a line of keyword-value pairs, each keyword separated
@@ -41,9 +41,9 @@ on the first or second non-blank line of the file.
 An example attribute-list is:
 
 ;; -*- Syntax: Lisp; Base: 10 -*- "
-  (evaluate-attribute-line (current-buffer)))
+  (climacs-core:evaluate-attribute-line (esa:current-buffer)))
 
-(define-command (com-update-attribute-list :name t :command-table buffer-table)
+(clim:define-command (com-update-attribute-list :name t :command-table climacs1-gui:buffer-table)
     ()
   "Update the current buffers attribute list to reflect the
 settings of the syntax of the buffer.
@@ -63,28 +63,28 @@ An example attribute-list is:
 
 This command automatically comments the attribute line as
 appropriate for the syntax of the buffer."
-  (update-attribute-line (current-buffer))
-  (evaluate-attribute-line (current-buffer)))
+  (climacs-core:update-attribute-line (esa:current-buffer))
+  (climacs-core:evaluate-attribute-line (esa:current-buffer)))
 
-(define-command (com-insert-file :name t :command-table buffer-table)
+(clim:define-command (com-insert-file :name t :command-table climacs1-gui:buffer-table)
     ((filename 'pathname :prompt "Insert File"
-                         :default (directory-of-buffer (current-buffer))
+                         :default (climacs-core:directory-of-buffer (esa:current-buffer))
                          :default-type 'pathname
                          :insert-default t))
   "Prompt for a filename and insert its contents at point.
 Leaves mark after the inserted contents."
   (when (probe-file filename)
-    (setf (mark (current-view)) (clone-mark (point) :left))
+    (setf (drei-buffer:mark (drei:current-view)) (drei-buffer:clone-mark (drei:point) :left))
     (with-open-file (stream filename :direction :input)
-      (input-from-stream stream
-                         (current-buffer)
-                         (offset (point))))
-    (psetf (offset (mark)) (offset (point))
-           (offset (point)) (offset (mark))))
-  (redisplay-frame-panes *application-frame*))
+      (climacs-core:input-from-stream stream
+                         (esa:current-buffer)
+                         (drei-buffer:offset (drei:point))))
+    (psetf (drei-buffer:offset (drei-buffer:mark)) (drei-buffer:offset (drei:point))
+           (drei-buffer:offset (drei:point)) (drei-buffer:offset (drei-buffer:mark))))
+  (clim:redisplay-frame-panes clim:*application-frame*))
 
-(set-key `(com-insert-file ,*unsupplied-argument-marker*)
-	 'buffer-table
+(esa:set-key `(com-insert-file ,clim:*unsupplied-argument-marker*)
+	 'climacs-gui:buffer-table
 	 '((#\x :control) (#\i :control)))
 
 (define-command (com-revert-buffer :name t :command-table buffer-table) ()
