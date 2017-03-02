@@ -31,10 +31,11 @@
 (clim:define-command
     (com-not-modified :name t :command-table climacs1-gui:buffer-table)
     ()
-  "Clear the modified flag for the current buffer.
-The modified flag is automatically set when the contents
-of the buffer are changed. This flag is consulted, for instance,
-when deciding whether to prompt you to save the buffer before killing it."
+  #.(format nil "Clear the modified flag for the current buffer.~@
+                 The modified flag is automatically set when the~@
+                 contents of the buffer are changed. This flag is~@
+                 consulted, for instance, when deciding whether to~@
+                 prompt you to save the buffer before killing it.")
   (setf (esa-buffer:needs-saving (esa:current-buffer)) nil))
 
 (esa:set-key 'com-not-modified
@@ -44,12 +45,13 @@ when deciding whether to prompt you to save the buffer before killing it."
 (clim:define-command
     (com-what-cursor-position :name t :command-table drei:info-table)
     ()
-  "Print information about point.
-Gives the character after point (name and octal, decimal and hexidecimal charcode),
-the offset of point, the total objects in the buffer,
-and the percentage of the buffers objects before point.
-
-FIXME: gives no information at end of buffer."
+  #.(format nil "Print information about point.~@
+                 Gives the character after point (name and octal,~@
+                 decimal and hexidecimal charcode), the offset of~@
+                 point, the total objects in the buffer, and the~@
+                 percentage of the buffers objects before point.~@
+                 ~@
+                FIXME: gives no information at end of buffer.")
   (let* ((char (or (drei-buffer:end-of-buffer-p (drei:point))
                    (drei-buffer:object-after (drei:point))))
          (column (drei-buffer:column-number (drei:point))))
@@ -81,8 +83,9 @@ FIXME: gives no information at end of buffer."
     (com-set-syntax :name t :command-table climacs1-gui:buffer-table)
     ((syntax 'drei-syntax:syntax
              :prompt "Name of syntax"))
-  "Prompts for a syntax to set for the current buffer.
-   Setting a syntax will cause the buffer to be reparsed using the new syntax."
+  #.(format nil "Prompts for a syntax to set for the current buffer.~@
+                 Setting a syntax will cause the buffer to be reparsed~@
+                 using the new syntax.")
   (drei-core:set-syntax (drei:current-view) syntax))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
