@@ -43,7 +43,6 @@
     ()
   (asdf:operate 'asdf:load-op :climacs))
 
-
 (clim:define-gesture-name :select-other #+mcclim :pointer-button-press
                                         #-mcclim :pointer-button
                                         (:left :meta) :unique nil)
@@ -61,7 +60,7 @@
     (com-accept-string :name t :command-table climacs1-gui:development-table)
     ()
   (esa:display-message (format nil "~s" (clim:accept 'string))))
- 
+
 (clim:define-command
     (com-accept-symbol :name t :command-table climacs1-gui:development-table)
     ()
