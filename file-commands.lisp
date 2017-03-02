@@ -62,7 +62,7 @@ second non-blank line of the file.
 
 An example attribute-list is:
 
-;; -*- Syntax: Lisp; Base: 10 -*- 
+;; -*- Syntax: Lisp; Base: 10 -*-
 
 This command automatically comments the attribute line as
 appropriate for the syntax of the buffer."
@@ -149,7 +149,7 @@ Signals and error if the file does not exist."
              '((#\c :control) (#\l :control)))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;; 
+;;;
 ;;; Buffer commands
 
 (clim:define-command
