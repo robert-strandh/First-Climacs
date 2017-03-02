@@ -46,8 +46,9 @@
 (clim:define-command
     (com-multiple-query-replace :name t :command-table drei:search-table)
     ()
-  "Prompts for pairs of strings, replacing the first with the second.
-Entering an empty search string stops the prompting."
+  #.(format nil "Prompts for pairs of strings, replacing the first~@
+                 with the second. Entering an empty search string~@
+                 stops the prompting.")
   (let ((strings
           (loop for string1 = (clim:accept 'string :prompt "Multiple Query Replace")
                 until (string= string1 "")
