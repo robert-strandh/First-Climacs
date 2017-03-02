@@ -26,22 +26,22 @@
 
 (cl:in-package #:climacs-commands)
 
-(define-command (com-reset-profile :name t :command-table development-table) ()
+(clim:define-command (com-reset-profile :name t :command-table climacs1-gui:development-table) ()
   #+sbcl (sb-profile:reset)
   #-sbcl nil)
 
-(define-command (com-report-profile :name t :command-table development-table) ()
+(clim:define-command (com-report-profile :name t :command-table climacs1-gui:development-table) ()
   #+sbcl (sb-profile:report)
   #-sbcl nil)
 
-(define-command (com-recompile :name t :command-table development-table) ()
+(clim:define-command (com-recompile :name t :command-table climacs1-gui:development-table) ()
   (asdf:operate 'asdf:load-op :climacs))
 
 
-(define-gesture-name :select-other #+mcclim :pointer-button-press #-mcclim :pointer-button (:left :meta) :unique nil)
+(clim:define-gesture-name :select-other #+mcclim :pointer-button-press #-mcclim :pointer-button (:left :meta) :unique nil)
 
-(define-presentation-translator lisp-string-to-string
-    (drei-lisp-syntax::lisp-string string development-table
+(clim:define-presentation-translator lisp-string-to-string
+    (drei-lisp-syntax::lisp-string string climacs1-gui:development-table
                   :gesture :select-other
                   :tester-definitive t
                   :menu nil
@@ -49,11 +49,11 @@
     (object)
   object)
 
-(define-command (com-accept-string :name t :command-table development-table) ()
-  (display-message (format nil "~s" (accept 'string))))
+(clim:define-command (com-accept-string :name t :command-table climacs1-gui:development-table) ()
+  (esa:display-message (format nil "~s" (clim:accept 'string))))
  
-(define-command (com-accept-symbol :name t :command-table development-table) ()
-  (display-message (format nil "~s" (accept 'symbol))))	 
+(clim:define-command (com-accept-symbol :name t :command-table climacs1-gui:development-table) ()
+  (esa:display-message (format nil "~s" (clim:accept 'symbol))))
 
-(define-command (com-accept-lisp-string :name t :command-table development-table) ()
-  (display-message (format nil "~s" (accept 'lisp-string))))
+(clim:define-command (com-accept-lisp-string :name t :command-table climacs1-gui:development-table) ()
+  (esa:display-message (format nil "~s" (accept 'lisp-string))))
