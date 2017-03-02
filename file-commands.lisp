@@ -28,7 +28,8 @@
 
 (cl:in-package #:climacs-commands)
 
-(clim:define-command (com-reparse-attribute-list :name t :command-table climacs1-gui:buffer-table)
+(clim:define-command
+    (com-reparse-attribute-list :name t :command-table climacs1-gui:buffer-table)
     ()
   "Reparse the current buffer's attribute list.
 An attribute list is a line of keyword-value pairs, each keyword separated
@@ -43,7 +44,9 @@ An example attribute-list is:
 ;; -*- Syntax: Lisp; Base: 10 -*- "
   (climacs-core:evaluate-attribute-line (esa:current-buffer)))
 
-(clim:define-command (com-update-attribute-list :name t :command-table climacs1-gui:buffer-table)
+(clim:define-command (com-update-attribute-list
+                      :name t
+                      :command-table climacs1-gui:buffer-table)
     ()
   "Update the current buffers attribute list to reflect the
 settings of the syntax of the buffer.
@@ -66,48 +69,61 @@ appropriate for the syntax of the buffer."
   (climacs-core:update-attribute-line (esa:current-buffer))
   (climacs-core:evaluate-attribute-line (esa:current-buffer)))
 
-(clim:define-command (com-insert-file :name t :command-table climacs1-gui:buffer-table)
-    ((filename 'pathname :prompt "Insert File"
-                         :default (climacs-core:directory-of-buffer (esa:current-buffer))
-                         :default-type 'pathname
-                         :insert-default t))
+(clim:define-command
+    (com-insert-file :name t :command-table climacs1-gui:buffer-table)
+    ((filename 'pathname
+               :prompt "Insert File"
+               :default (climacs-core:directory-of-buffer (esa:current-buffer))
+               :default-type 'pathname
+               :insert-default t))
   "Prompt for a filename and insert its contents at point.
 Leaves mark after the inserted contents."
   (when (probe-file filename)
-    (setf (drei-buffer:mark (drei:current-view)) (drei-buffer:clone-mark (drei:point) :left))
+    (setf (drei-buffer:mark (drei:current-view))
+          (drei-buffer:clone-mark (drei:point) :left))
     (with-open-file (stream filename :direction :input)
       (climacs-core:input-from-stream stream
-                         (esa:current-buffer)
-                         (drei-buffer:offset (drei:point))))
-    (psetf (drei-buffer:offset (drei-buffer:mark)) (drei-buffer:offset (drei:point))
-           (drei-buffer:offset (drei:point)) (drei-buffer:offset (drei-buffer:mark))))
+                                      (esa:current-buffer)
+                                      (drei-buffer:offset (drei:point))))
+    (psetf (drei-buffer:offset (drei-buffer:mark))
+           (drei-buffer:offset (drei:point))
+           (drei-buffer:offset (drei:point))
+           (drei-buffer:offset (drei-buffer:mark))))
   (clim:redisplay-frame-panes clim:*application-frame*))
 
 (esa:set-key `(com-insert-file ,clim:*unsupplied-argument-marker*)
-         'climacs1-gui:buffer-table
-         '((#\x :control) (#\i :control)))
+             'climacs1-gui:buffer-table
+             '((#\x :control) (#\i :control)))
 
-(clim:define-command (com-revert-buffer :name t :command-table climacs1-gui:buffer-table) ()
+(clim:define-command
+    (com-revert-buffer :name t :command-table climacs1-gui:buffer-table)
+    ()
   "Replace the contents of the current buffer with the visited file.
 Signals an error if the file does not exist."
   (let* ((save (drei-buffer:offset (drei:point)))
          (filepath (esa-buffer:filepath (esa:current-buffer))))
-    (when (clim:accept 'boolean :prompt (format nil "Revert buffer from file ~A?"
-                                           filepath))
+    (when (clim:accept 'boolean
+                       :prompt (format nil "Revert buffer from file ~A?"
+                                       filepath))
       (cond ((climacs-core:directory-pathname-p filepath)
-           (esa:display-message "~A is a directory name." filepath)
-           (clim:beep))
-          ((probe-file filepath)
-           (unless (climacs-core:check-file-times (esa:current-buffer) filepath "Revert" "reverted")
-             (return-from com-revert-buffer))
-           (erase-buffer (esa:current-buffer))
-           (with-open-file (stream filepath :direction :input)
-             (climacs-core:input-from-stream stream (esa:current-buffer) 0))
-           (setf (drei-buffer:offset (drei:point)) (min (drei-buffer:size (esa:current-buffer)) save)
-                 (esa-buffer:file-saved-p (esa:current-buffer)) nil))
-          (t
-           (esa:display-message "No file ~A" filepath)
-           (clim:beep))))))
+             (esa:display-message "~A is a directory name." filepath)
+             (clim:beep))
+            ((probe-file filepath)
+             (unless (climacs-core:check-file-times (esa:current-buffer)
+                                                    filepath
+                                                    "Revert"
+                                                    "reverted")
+               (return-from com-revert-buffer))
+             (erase-buffer (esa:current-buffer))
+             (with-open-file (stream filepath :direction :input)
+               (climacs-core:input-from-stream stream (esa:current-buffer) 0))
+             (setf (drei-buffer:offset (drei:point))
+                   (min (drei-buffer:size (esa:current-buffer)) save)
+                   (esa-buffer:file-saved-p (esa:current-buffer))
+                   nil))
+            (t
+             (esa:display-message "No file ~A" filepath)
+             (clim:beep))))))
 
 (defun load-file (file-name)
   (cond ((climacs-core:directory-pathname-p file-name)
@@ -120,36 +136,42 @@ Signals an error if the file does not exist."
                 (esa:display-message "No such file: ~A" file-name)
                 (clim:beep))))))
 
-(clim:define-command (com-load-file :name t :command-table climacs1-gui:base-table) ()
+(clim:define-command
+    (com-load-file :name t :command-table climacs1-gui:base-table)
+    ()
   "Prompt for a filename and CL:LOAD that file.
 Signals and error if the file does not exist."
   (let ((filepath (clim:accept 'pathname :prompt "Load File")))
     (load-file filepath)))
 
 (esa:set-key 'com-load-file
-         'climacs1-gui:base-table
-         '((#\c :control) (#\l :control)))
+             'climacs1-gui:base-table
+             '((#\c :control) (#\l :control)))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; 
 ;;; Buffer commands
 
-(clim:define-command (com-toggle-read-only :name t :command-table climacs1-gui:buffer-table)
+(clim:define-command
+    (com-toggle-read-only :name t :command-table climacs1-gui:buffer-table)
     ((buffer 'esa-io:buffer :default (esa:current-buffer)))
-  (setf (esa-buffer:read-only-p buffer) (not (esa-buffer:read-only-p buffer))))
+  (setf (esa-buffer:read-only-p buffer)
+        (not (esa-buffer:read-only-p buffer))))
 
 (clim:define-presentation-to-command-translator toggle-read-only
     (read-only com-toggle-read-only climacs1-gui:buffer-table
-               :gesture :menu)
+     :gesture :menu)
     (object)
   (list object))
 
-(clim:define-command (com-toggle-modified :name t :command-table climacs1-gui:buffer-table)
+(clim:define-command
+    (com-toggle-modified :name t :command-table climacs1-gui:buffer-table)
     ((buffer 'esa-io:buffer :default (esa:current-buffer)))
-  (setf (esa-buffer:needs-saving buffer) (not (esa-buffer:needs-saving buffer))))
+  (setf (esa-buffer:needs-saving buffer)
+        (not (esa-buffer:needs-saving buffer))))
 
 (clim:define-presentation-to-command-translator toggle-modified
     (modified com-toggle-modified climacs1-gui:buffer-table
-              :gesture :menu)
+     :gesture :menu)
     (object)
   (list object))
