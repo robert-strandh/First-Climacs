@@ -84,8 +84,8 @@ Leaves mark after the inserted contents."
   (clim:redisplay-frame-panes clim:*application-frame*))
 
 (esa:set-key `(com-insert-file ,clim:*unsupplied-argument-marker*)
-	 'climacs-gui:buffer-table
-	 '((#\x :control) (#\i :control)))
+         'climacs-gui:buffer-table
+         '((#\x :control) (#\i :control)))
 
 (define-command (com-revert-buffer :name t :command-table buffer-table) ()
   "Replace the contents of the current buffer with the visited file.
@@ -93,32 +93,32 @@ Signals an error if the file does not exist."
   (let* ((save (offset (point)))
          (filepath (filepath (current-buffer))))
     (when (accept 'boolean :prompt (format nil "Revert buffer from file ~A?"
-					   filepath))
+                                           filepath))
       (cond ((directory-pathname-p filepath)
-	   (display-message "~A is a directory name." filepath)
-	   (beep))
-	  ((probe-file filepath)
-	   (unless (check-file-times (current-buffer) filepath "Revert" "reverted")
-	     (return-from com-revert-buffer))
-	   (erase-buffer (current-buffer))
-	   (with-open-file (stream filepath :direction :input)
-	     (input-from-stream stream (current-buffer) 0))
-	   (setf (offset (point)) (min (size (current-buffer)) save)
-		 (file-saved-p (current-buffer)) nil))
-	  (t
-	   (display-message "No file ~A" filepath)
-	   (beep))))))
+           (display-message "~A is a directory name." filepath)
+           (beep))
+          ((probe-file filepath)
+           (unless (check-file-times (current-buffer) filepath "Revert" "reverted")
+             (return-from com-revert-buffer))
+           (erase-buffer (current-buffer))
+           (with-open-file (stream filepath :direction :input)
+             (input-from-stream stream (current-buffer) 0))
+           (setf (offset (point)) (min (size (current-buffer)) save)
+                 (file-saved-p (current-buffer)) nil))
+          (t
+           (display-message "No file ~A" filepath)
+           (beep))))))
 
 (defun load-file (file-name)
   (cond ((directory-pathname-p file-name)
-	 (display-message "~A is a directory name." file-name)
-	 (beep))
-	(t
-	 (cond ((probe-file file-name)
-		(load file-name))
-	       (t
-		(display-message "No such file: ~A" file-name)
-		(beep))))))
+         (display-message "~A is a directory name." file-name)
+         (beep))
+        (t
+         (cond ((probe-file file-name)
+                (load file-name))
+               (t
+                (display-message "No such file: ~A" file-name)
+                (beep))))))
 
 (define-command (com-load-file :name t :command-table base-table) ()
   "Prompt for a filename and CL:LOAD that file.
@@ -127,8 +127,8 @@ Signals and error if the file does not exist."
     (load-file filepath)))
 
 (set-key 'com-load-file
-	 'base-table
-	 '((#\c :control) (#\l :control)))
+         'base-table
+         '((#\c :control) (#\l :control)))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; 
