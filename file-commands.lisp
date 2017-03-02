@@ -84,72 +84,72 @@ Leaves mark after the inserted contents."
   (clim:redisplay-frame-panes clim:*application-frame*))
 
 (esa:set-key `(com-insert-file ,clim:*unsupplied-argument-marker*)
-         'climacs-gui:buffer-table
+         'climacs1-gui:buffer-table
          '((#\x :control) (#\i :control)))
 
-(define-command (com-revert-buffer :name t :command-table buffer-table) ()
+(clim:define-command (com-revert-buffer :name t :command-table climacs1-gui:buffer-table) ()
   "Replace the contents of the current buffer with the visited file.
 Signals an error if the file does not exist."
-  (let* ((save (offset (point)))
-         (filepath (filepath (current-buffer))))
-    (when (accept 'boolean :prompt (format nil "Revert buffer from file ~A?"
+  (let* ((save (drei-buffer:offset (drei:point)))
+         (filepath (esa-buffer:filepath (esa:current-buffer))))
+    (when (clim:accept 'boolean :prompt (format nil "Revert buffer from file ~A?"
                                            filepath))
-      (cond ((directory-pathname-p filepath)
-           (display-message "~A is a directory name." filepath)
-           (beep))
+      (cond ((climacs-core:directory-pathname-p filepath)
+           (esa:display-message "~A is a directory name." filepath)
+           (clim:beep))
           ((probe-file filepath)
-           (unless (check-file-times (current-buffer) filepath "Revert" "reverted")
+           (unless (climacs-core:check-file-times (esa:current-buffer) filepath "Revert" "reverted")
              (return-from com-revert-buffer))
-           (erase-buffer (current-buffer))
+           (erase-buffer (esa:current-buffer))
            (with-open-file (stream filepath :direction :input)
-             (input-from-stream stream (current-buffer) 0))
-           (setf (offset (point)) (min (size (current-buffer)) save)
-                 (file-saved-p (current-buffer)) nil))
+             (climacs-core:input-from-stream stream (esa:current-buffer) 0))
+           (setf (drei-buffer:offset (drei:point)) (min (drei-buffer:size (esa:current-buffer)) save)
+                 (esa-buffer:file-saved-p (esa:current-buffer)) nil))
           (t
-           (display-message "No file ~A" filepath)
-           (beep))))))
+           (esa:display-message "No file ~A" filepath)
+           (clim:beep))))))
 
 (defun load-file (file-name)
-  (cond ((directory-pathname-p file-name)
-         (display-message "~A is a directory name." file-name)
-         (beep))
+  (cond ((climacs-core:directory-pathname-p file-name)
+         (esa:display-message "~A is a directory name." file-name)
+         (clim:beep))
         (t
          (cond ((probe-file file-name)
                 (load file-name))
                (t
-                (display-message "No such file: ~A" file-name)
-                (beep))))))
+                (esa:display-message "No such file: ~A" file-name)
+                (clim:beep))))))
 
-(define-command (com-load-file :name t :command-table base-table) ()
+(clim:define-command (com-load-file :name t :command-table climacs1-gui:base-table) ()
   "Prompt for a filename and CL:LOAD that file.
 Signals and error if the file does not exist."
-  (let ((filepath (accept 'pathname :prompt "Load File")))
+  (let ((filepath (clim:accept 'pathname :prompt "Load File")))
     (load-file filepath)))
 
-(set-key 'com-load-file
-         'base-table
+(esa:set-key 'com-load-file
+         'climacs1-gui:base-table
          '((#\c :control) (#\l :control)))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; 
 ;;; Buffer commands
 
-(define-command (com-toggle-read-only :name t :command-table buffer-table)
-    ((buffer 'buffer :default (current-buffer)))
-  (setf (read-only-p buffer) (not (read-only-p buffer))))
+(clim:define-command (com-toggle-read-only :name t :command-table climacs1-gui:buffer-table)
+    ((buffer 'esa-io:buffer :default (esa:current-buffer)))
+  (setf (esa-buffer:read-only-p buffer) (not (esa-buffer:read-only-p buffer))))
 
-(define-presentation-to-command-translator toggle-read-only
-    (read-only com-toggle-read-only buffer-table
+(clim:define-presentation-to-command-translator toggle-read-only
+    (read-only com-toggle-read-only climacs1-gui:buffer-table
                :gesture :menu)
     (object)
   (list object))
 
-(define-command (com-toggle-modified :name t :command-table buffer-table)
-    ((buffer 'buffer :default (current-buffer)))
-  (setf (needs-saving buffer) (not (needs-saving buffer))))
+(clim:define-command (com-toggle-modified :name t :command-table climacs1-gui:buffer-table)
+    ((buffer 'esa-io:buffer :default (esa:current-buffer)))
+  (setf (esa-buffer:needs-saving buffer) (not (esa-buffer:needs-saving buffer))))
 
-(define-presentation-to-command-translator toggle-modified
-    (modified com-toggle-modified buffer-table
+(clim:define-presentation-to-command-translator toggle-modified
+    (modified com-toggle-modified climacs1-gui:buffer-table
               :gesture :menu)
     (object)
   (list object))
