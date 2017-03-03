@@ -310,7 +310,7 @@ their values."
     (find pathname (remove-if-not #'(lambda (view)
                                       (typep view 'drei:drei-buffer-view))
                                   (drei-core:views clim:*application-frame*))
-          :key #'(lambda (view) (filepath (esa-io:buffer view)))
+          :key #'(lambda (view) (esa-buffer:filepath (esa-io:buffer view)))
           :test #'(lambda (fp1 fp2)
                     (and fp1 fp2
                          (equal (usable-pathname fp1)
@@ -365,7 +365,7 @@ file if necessary."
                  (setf (esa-utils:name buffer) (filepath-filename filepath))
                  (setf (drei:current-view (esa:current-window)) view)
                  (evaluate-attribute-line view)
-                 (setf (filepath buffer) (pathname filepath)
+                 (setf (esa-buffer:filepath buffer) (pathname filepath)
                        (esa-buffer:read-only-p buffer) readonlyp)
                  (drei-buffer:beginning-of-buffer (drei:point view))
                  buffer))))))
