@@ -30,21 +30,21 @@
                                     (default-type type))
   (multiple-value-bind (object success string)
       (complete-input stream
-		      (lambda (so-far action)
-			(complete-from-possibilities
-			 so-far (views *esa-instance*) '()
+                      (lambda (so-far action)
+                        (complete-from-possibilities
+                         so-far (views *esa-instance*) '()
                          :action action
-			 :name-key #'subscripted-name
-			 :value-key #'identity))
-		      :partial-completers '(#\Space)
-		      :allow-any-input t)
+                         :name-key #'subscripted-name
+                         :value-key #'identity))
+                      :partial-completers '(#\Space)
+                      :allow-any-input t)
     (cond ((and success (plusp (length string)))
            (if object
                (values object type)
                (values string 'string)))
-	  ((and (zerop (length string)) defaultp)
+          ((and (zerop (length string)) defaultp)
            (values default default-type))
-	  (t
+          (t
            (values string 'string)))))
 
 (defgeneric switch-to-view (drei view)
@@ -138,7 +138,7 @@ it will be replaced by some other view."))
   (if (null (pathname-type pathname))
       (pathname-name pathname)
       (concatenate 'string (pathname-name pathname)
-		   "." (pathname-type pathname))))
+                   "." (pathname-type pathname))))
 
 (defun syntax-class-name-for-filepath (filepath)
   (let ((syntax-description
@@ -183,21 +183,21 @@ their values."
 (defun split-attribute (string char)
   (let (pairs)
     (loop with start = 0
-	  for ch across string
-	  for i from 0
-	  when (eql ch char)
-	    do (push (string-trim '(#\Space #\Tab) (subseq string start i))
-		     pairs)
-	       (setf start (1+ i))
-	  finally (unless (>= start i)
-		    (push (string-trim '(#\Space #\Tab) (subseq string start))
-			  pairs)))
+          for ch across string
+          for i from 0
+          when (eql ch char)
+            do (push (string-trim '(#\Space #\Tab) (subseq string start i))
+                     pairs)
+               (setf start (1+ i))
+          finally (unless (>= start i)
+                    (push (string-trim '(#\Space #\Tab) (subseq string start))
+                          pairs)))
     (nreverse pairs)))
 
 (defun split-attribute-line (line)
   (when line
     (mapcar (lambda (pair) (split-attribute pair #\:))
-	    (split-attribute line #\;))))
+            (split-attribute line #\;))))
 
 (defun find-attribute-line-position (buffer)
   (let ((scan (make-buffer-mark buffer 0)))
@@ -208,7 +208,7 @@ their values."
     ;; stop looking if we're already 1,000 objects into the buffer
     (unless (> (offset scan) 1000)
       (let ((start-found
-	     (loop with newlines = 0
+             (loop with newlines = 0
                 when (end-of-buffer-p scan)
                 do (return nil)
                 when (eql (object-after scan) #\Newline)
@@ -218,7 +218,7 @@ their values."
                 until (looking-at scan "-*-")
                 do (forward-object scan)
                 finally (return t))))
-	(when start-found
+        (when start-found
           (let* ((end-scan (clone-mark scan))
                  (end-found
                   (loop when (end-of-buffer-p end-scan)
@@ -238,12 +238,12 @@ their values."
       (find-attribute-line-position buffer)
    (when (and start-mark end-mark)
      (let ((line (buffer-substring buffer
-				   (offset start-mark)
-				   (offset end-mark))))
+                                   (offset start-mark)
+                                   (offset end-mark))))
        (when (>= (length line) 6)
-	 (let ((end (search "-*-" line :from-end t :start2 3)))
-	   (when end
-	     (string-trim '(#\Space #\Tab) (subseq line 3 end)))))))))
+         (let ((end (search "-*-" line :from-end t :start2 3)))
+           (when end
+             (string-trim '(#\Space #\Tab) (subseq line 3 end)))))))))
 
 (defun replace-attribute-line (view new-attribute-line)
   (let ((full-attribute-line (concatenate 'string
@@ -282,9 +282,9 @@ their values."
 (defun directory-pathname-p (pathspec)
   "Returns NIL if PATHSPEC does not designate a directory."
   (let ((name (pathname-name pathspec))
-	(type (pathname-type pathspec)))
+        (type (pathname-type pathspec)))
     (and (or (null name) (eql name :unspecific))
-	 (or (null type) (eql type :unspecific)))))
+         (or (null type) (eql type :unspecific)))))
 
 (defun findablep (pathname)
   "Return non-NIL if `pathname' can be opened by Climacs. That
@@ -317,11 +317,11 @@ file if necessary."
 
 (defun find-file-impl (filepath &optional readonlyp)
   (cond ((null filepath)
-	 (display-message "No file name given.")
-	 (beep))
-	((directory-pathname-p filepath)
-	 (display-message "~A is a directory name." filepath)
-	 (beep))
+         (display-message "No file name given.")
+         (beep))
+        ((directory-pathname-p filepath)
+         (display-message "~A is a directory name." filepath)
+         (beep))
         (t
          (let ((existing-view (find-view-with-pathname filepath)))
            (if (and existing-view
@@ -373,30 +373,30 @@ directory will be returned."
    :directory
    (pathname-directory
     (or (filepath buffer)
-	(user-homedir-pathname)))))
+        (user-homedir-pathname)))))
 
 (defmethod frame-set-visited-filename
     ((application-frame climacs) filepath buffer)
   (setf (filepath buffer) (pathname filepath)
-	(file-saved-p buffer) nil
-	(file-write-time buffer) nil
-	(name buffer) (filepath-filename filepath)
-	(needs-saving buffer) t))
+        (file-saved-p buffer) nil
+        (file-write-time buffer) nil
+        (name buffer) (filepath-filename filepath)
+        (needs-saving buffer) t))
 
 (defun check-file-times (buffer filepath question answer)
   "Return NIL if filepath newer than buffer and user doesn't want
 to overwrite."
   (let ((f-w-d (file-write-date filepath))
-	(f-w-t (file-write-time buffer)))
+        (f-w-t (file-write-time buffer)))
     (if (and f-w-d f-w-t (> f-w-d f-w-t))
-	(if (accept
+        (if (accept
              'boolean
              :prompt (format nil "File has changed on disk. ~a anyway?"
                              question))
-	    t
-	    (progn (display-message "~a not ~a" filepath answer)
-		   nil))
-	t)))
+            t
+            (progn (display-message "~a not ~a" filepath answer)
+                   nil))
+        t)))
 
 (defmethod frame-exit :around ((frame climacs) #-mcclim &key)
   (dolist (view (views frame))
@@ -415,10 +415,10 @@ to overwrite."
         (display-message "~A (hit a key to continue)" e)
         (read-gesture))))
   (when (or (notany #'buffer-of-view-needs-saving (views frame))
-	    (handler-case (accept
+            (handler-case (accept
                            'boolean
                            :prompt "Modified buffers of views exist.  Quit anyway?")
-	      (error () (progn (beep)
-			       (display-message "Invalid answer")
-			       (return-from frame-exit nil)))))
+              (error () (progn (beep)
+                               (display-message "Invalid answer")
+                               (return-from frame-exit nil)))))
     (call-next-method)))
