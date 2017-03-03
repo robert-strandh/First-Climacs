@@ -69,4 +69,4 @@
 (clim:define-command
     (com-accept-lisp-string :name t :command-table climacs1-gui:development-table)
     ()
-  (esa:display-message (format nil "~s" (accept 'lisp-string))))
+  (esa:display-message (format nil "~s" (clim:accept 'lisp-string))))
