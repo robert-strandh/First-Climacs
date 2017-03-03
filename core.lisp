@@ -12,7 +12,7 @@
 (cl:in-package #:climacs-core)
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;; 
+;;;
 ;;; Buffer handling
 
 (defmethod frame-make-new-buffer ((application-frame climacs)
@@ -131,7 +131,7 @@ it will be replaced by some other view."))
   (kill-view (current-view)))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;; 
+;;;
 ;;; File handling
 
 (defun filepath-filename (pathname)
