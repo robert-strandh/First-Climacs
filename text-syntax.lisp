@@ -28,7 +28,7 @@
 ;;; character other than a newline and preceded either by nothing
 ;;; (beginning of the buffer), by a newline character at the beginning
 ;;; of the buffer, or by two newline characters.
-;;; 
+;;;
 ;;; There is exactly one right-sticky mark at every offset preceded by
 ;;; a character other than a newline and followed either by nothing
 ;;; (end of the buffer), by a newline character at the end of the
@@ -36,8 +36,8 @@
 ;;;
 ;;; It follows that:
 ;;;   * there can never be two marks in the same place,
-;;;   * there are as many left-sticky marks as right-sticky marks, 
-;;;   * left-sticky and right-sticky marks alternate, starting with a 
+;;;   * there are as many left-sticky marks as right-sticky marks,
+;;;   * left-sticky and right-sticky marks alternate, starting with a
 ;;;     left-sticky mark
 ;;;
 ;;; N.B.: These invariants only hold AFTER a complete syntax analysis.
@@ -47,10 +47,10 @@
 ;;; D.H.: Invariant text needs to change to reflect sentences.
 ;;;       Should there be paragraph invariants and sentence invariants?
 ;;;       Did I ducttape this in the wrong place?
-;;;       Sentence invariants:  
+;;;       Sentence invariants:
 ;;;       Left stickies after . ? and !, at the end of the buffer
 ;;;       Right stickies at non whitespace characters preceeded by space and punctuation.
-;;;       
+;;;
 
 (cl:in-package #:climacs-text-syntax)
 
@@ -79,11 +79,11 @@
          (high-mark-offset (- (size buffer) suffix-size))
          (low-mark-offset prefix-size)
          (high-offset (min (+ high-mark-offset 3) (size buffer)))
-	 (low-offset (max (- low-mark-offset 3) 0)))
+         (low-offset (max (- low-mark-offset 3) 0)))
     (with-slots (paragraphs sentence-beginnings sentence-endings) syntax
       (let ((pos1 (index-of-mark-after-offset paragraphs low-offset))
-	    (pos-sentence-beginnings (index-of-mark-after-offset sentence-beginnings low-offset))
-	    (pos-sentence-endings (index-of-mark-after-offset sentence-endings low-offset)))
+            (pos-sentence-beginnings (index-of-mark-after-offset sentence-beginnings low-offset))
+            (pos-sentence-endings (index-of-mark-after-offset sentence-endings low-offset)))
         ;; start by deleting all syntax marks that are between the low and
         ;; the high marks
         (loop repeat (- (nb-elements paragraphs) pos1)
@@ -100,11 +100,11 @@
         ;; paragraph delimiters and sentence delimiters
         (loop with buffer-size = (size buffer)
            for offset from low-offset to high-offset ;; Could be rewritten with even fewer buffer-object calls,
-           for current-object = nil then (if (>= offset high-offset) nil (buffer-object buffer offset)) ;;  but it'd be premature optimization, and messy besides.  
+           for current-object = nil then (if (>= offset high-offset) nil (buffer-object buffer offset)) ;;  but it'd be premature optimization, and messy besides.
            for next-object =  nil then (if (>= offset (- high-offset 1)) nil (buffer-object buffer (1+ offset)))
            for prev-object =  nil then (if (= offset low-offset) nil (buffer-object buffer (1- offset)))
            for before-prev-object = nil then (if (<= offset (1+ low-offset)) nil (buffer-object buffer (- offset 2)))
-           do (progn 
+           do (progn
                 (cond ((and (< offset buffer-size)
                             (member prev-object '(#\. #\? #\!))
                             (or (= offset (1- buffer-size))
@@ -158,10 +158,10 @@
   (with-slots (paragraphs) syntax
      (let ((pos1 (index-of-mark-after-offset paragraphs (offset mark))))
        (when (> pos1 0)
-	 (setf (offset mark)
-	       (if (typep (element* paragraphs (1- pos1)) 'right-sticky-mark)
-		   (offset (element* paragraphs (- pos1 2)))
-		   (offset (element* paragraphs (1- pos1)))))
+         (setf (offset mark)
+               (if (typep (element* paragraphs (1- pos1)) 'right-sticky-mark)
+                   (offset (element* paragraphs (- pos1 2)))
+                   (offset (element* paragraphs (1- pos1)))))
          t))))
 
 (defmethod forward-one-paragraph ((mark mark) (syntax text-syntax))
@@ -172,10 +172,10 @@
                  ;; paragraph
                  (1+ (offset mark)))))
       (when (< pos1 (nb-elements paragraphs))
-	 (setf (offset mark)
-	       (if (typep (element* paragraphs pos1) 'left-sticky-mark)
-		   (offset (element* paragraphs (1+ pos1)))
-		   (offset (element* paragraphs pos1))))
+         (setf (offset mark)
+               (if (typep (element* paragraphs pos1) 'left-sticky-mark)
+                   (offset (element* paragraphs (1+ pos1)))
+                   (offset (element* paragraphs pos1))))
          t))))
 
  (defmethod backward-one-sentence ((mark mark) (syntax text-syntax))
@@ -194,7 +194,7 @@
                   ;; sentence
                   (1+ (offset mark)))))
        (when (< pos1 (nb-elements sentence-endings))
- 	 (setf (offset mark)
+         (setf (offset mark)
                (offset (element* sentence-endings pos1)))
          t))))
 
