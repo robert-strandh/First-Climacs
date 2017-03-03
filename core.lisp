@@ -15,26 +15,26 @@
 ;;;
 ;;; Buffer handling
 
-(defmethod frame-make-new-buffer ((application-frame climacs)
+(defmethod esa-buffer:frame-make-new-buffer ((application-frame climacs1-gui:climacs)
                                   &key (name "*scratch*"))
-  (make-instance 'climacs-buffer :name name))
+  (make-instance 'climacs1-gui:climacs-buffer :name name))
 
-(define-presentation-method present ((object drei-view) (type view)
-                                     stream (view textual-view)
+(clim:define-presentation-method clim:present ((object drei:drei-view) (type drei::view)
+                                     stream (view clim:textual-view)
                                      &key acceptably for-context-type)
   (declare (ignore acceptably for-context-type))
-  (princ (subscripted-name object) stream))
+  (princ (esa-utils:subscripted-name object) stream))
 
-(define-presentation-method accept ((type view) stream (view textual-view)
+(clim:define-presentation-method clim:accept ((type drei::view) stream (view clim:textual-view)
                                     &key (default nil defaultp)
                                     (default-type type))
   (multiple-value-bind (object success string)
-      (complete-input stream
+      (clim:complete-input stream
                       (lambda (so-far action)
-                        (complete-from-possibilities
-                         so-far (views *esa-instance*) '()
+                        (clim:complete-from-possibilities
+                         so-far (drei-core:views esa:*esa-instance*) '()
                          :action action
-                         :name-key #'subscripted-name
+                         :name-key #'esa-utils:subscripted-name
                          :value-key #'identity))
                       :partial-completers '(#\Space)
                       :allow-any-input t)
@@ -51,84 +51,84 @@
   (:documentation "High-level function for changing the view
 displayed by a Drei instance."))
 
-(defmethod switch-to-view ((drei climacs-pane) (view drei-view))
-  (setf (view drei) view))
+(defmethod switch-to-view ((drei climacs1-gui:climacs-pane) (view drei:drei-view))
+  (setf (drei::view drei) view))
 
 (defmethod switch-to-view (pane (name string))
-  (let ((view (find name (views (pane-frame pane))
-               :key #'subscripted-name :test #'string=)))
+  (let ((view (find name (drei-core:views (clim:pane-frame pane))
+               :key #'esa-utils:subscripted-name :test #'string=)))
     (switch-to-view
-     pane (or view (make-new-view-for-climacs
-                    (pane-frame pane) 'textual-drei-syntax-view
+     pane (or view (climacs1-gui:make-new-view-for-climacs
+                    (clim:pane-frame pane) 'drei:textual-drei-syntax-view
                     :name name)))))
 
 (defun switch-or-move-to-view (pane view)
   "Switch `pane' to show `view'. If `view' is already on display
 in some other pane, switch that pane to be the active one."
-  (handler-bind ((view-already-displayed
+  (handler-bind ((climacs1-gui:view-already-displayed
                   #'(lambda (c)
                       (declare (ignore c))
-                      (invoke-restart 'switch-to-pane))))
+                      (invoke-restart 'climacs1-gui:switch-to-pane))))
     (switch-to-view pane view)))
 
 (defun views-having-buffer (climacs buffer)
   "Return a list of the buffer-views of `climacs' showing
 `buffer'."
-  (loop for view in (views climacs)
-     when (and (typep view 'drei-buffer-view)
-               (eq (buffer view) buffer))
+  (loop for view in (drei-core:views climacs)
+     when (and (typep view 'drei:drei-buffer-view)
+               (eq (esa-io:buffer view) buffer))
      collect view))
 
 (defun buffer-of-view-needs-saving (view)
   "Return true if `view' is a `drei-buffer-view' and it needs to
 be saved (that is, it is related to a file and it has changed
 since it was last saved)."
-  (and (typep view 'drei-buffer-view)
-       (filepath (buffer view))
-       (needs-saving (buffer view))))
+  (and (typep view 'drei:drei-buffer-view)
+       (esa-buffer:filepath (esa-io:buffer view))
+       (esa-buffer:needs-saving (esa-io:buffer view))))
 
 (defun dummy-buffer ()
   "Create a dummy buffer object for use when killing views, to
 prevent increasing memory usage."
-  (make-instance 'drei-buffer))
+  (make-instance 'drei:drei-buffer))
 
 (defgeneric kill-view (view)
   (:documentation "Remove `view' from the Climacs specified in
 `*esa-instance*'. If `view' is currently displayed in a window,
 it will be replaced by some other view."))
 
-(defmethod kill-view ((view view))
-  (with-accessors ((views views)) *esa-instance*
+(defmethod kill-view ((view clim:view))
+  (with-accessors ((views drei-core:views)) esa:*esa-instance*
     ;; It might be the case that this view is the only view remaining
     ;; of some particular buffer, in that case, the user might want to
     ;; save it.
     (when (and (buffer-of-view-needs-saving view)
-               (= (length (views-having-buffer *esa-instance* (buffer view)))
+               (= (length (views-having-buffer esa:*esa-instance* (esa-io:buffer view)))
                   1)
-               (handler-case (accept
+               (handler-case (clim:accept
                               'boolean
                               :prompt "Save buffer first?")
-                 (error () (progn (beep)
-                                  (display-message "Invalid answer")
+                 (error () (progn (clim:beep)
+                                  (esa:display-message "Invalid answer")
                                   (return-from kill-view nil)))))
-      (save-buffer (buffer view)))
+      (esa-io:save-buffer (esa-io:buffer view)))
     (setf views (remove view views))
     ;; If we don't change the buffer of the view, a reference to the
     ;; view will be kept in the buffer, and the view will thus not be
     ;; garbage-collected. So create a circular reference structure
     ;; that can be garbage-collected instead.
-    (when (buffer-view-p view)
-      (setf (buffer view) (dummy-buffer)))
-    (full-redisplay (current-window))
-    (current-view)))
+    (when (drei:buffer-view-p view)
+      (setf (esa-io:buffer view) (dummy-buffer)))
+    (drei:full-redisplay (esa:current-window))
+    (drei:current-view)))
 
 (defmethod kill-view ((name string))
-  (let ((view (find name (views *application-frame*)
-                 :key #'subscripted-name :test #'string=)))
+  (let ((view (find name (drei-core:views clim:*application-frame*)
+                 :key #'esa-utils:subscripted-name :test #'string=)))
     (when view (kill-view view))))
 
 (defmethod kill-view ((symbol null))
-  (kill-view (current-view)))
+  (kill-view (drei:current-view)))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;
@@ -151,7 +151,7 @@ it will be replaced by some other view."))
     (if syntax-description
         (drei-syntax::syntax-description-class-name
          syntax-description)
-        *default-syntax*)))
+        drei-syntax:*default-syntax*)))
 
 (defun evaluate-attributes (view options)
   "Evaluate the attributes `options' and modify `view' as
@@ -162,23 +162,23 @@ their values."
   ;; Emacs. If there is more than one option with one of these names,
   ;; only the first will be acted upon.
   (let ((specified-syntax
-         (syntax-from-name
+         (drei-syntax:syntax-from-name
           (second (find-if #'(lambda (name)
                                (or (string-equal name "SYNTAX")
                                    (string-equal name "MODE")))
                            options
                            :key #'first)))))
     (when (and specified-syntax
-               (not (eq (class-of (syntax view))
+               (not (eq (class-of (drei-syntax:syntax view))
                         specified-syntax)))
-      (setf (syntax view)
-            (make-syntax-for-view view specified-syntax))))
+      (setf (drei-syntax:syntax view)
+            (drei:make-syntax-for-view view specified-syntax))))
   ;; Now we iterate through the options (discarding SYNTAX and MODE
   ;; options).
   (loop for (name value) in options
      unless (or (string-equal name "SYNTAX")
                 (string-equal name "MODE"))
-     do (eval-option (syntax view) name value)))
+     do (drei-syntax:eval-option (drei-syntax:syntax view) name value)))
 
 (defun split-attribute (string char)
   (let (pairs)
@@ -200,46 +200,46 @@ their values."
             (split-attribute line #\;))))
 
 (defun find-attribute-line-position (buffer)
-  (let ((scan (make-buffer-mark buffer 0)))
+  (let ((scan (drei-buffer:make-buffer-mark buffer 0)))
     ;; skip the leading whitespace
-    (loop until (end-of-buffer-p scan)
-       until (not (buffer-whitespacep (object-after scan)))
-       do (forward-object scan))
+    (loop until (drei-buffer:end-of-buffer-p scan)
+       until (not (drei-base:buffer-whitespacep (drei-buffer:object-after scan)))
+       do (drei-buffer:forward-object scan))
     ;; stop looking if we're already 1,000 objects into the buffer
-    (unless (> (offset scan) 1000)
+    (unless (> (drei-buffer:offset scan) 1000)
       (let ((start-found
              (loop with newlines = 0
-                when (end-of-buffer-p scan)
+                when (drei-buffer:end-of-buffer-p scan)
                 do (return nil)
-                when (eql (object-after scan) #\Newline)
+                when (eql (drei-buffer:object-after scan) #\Newline)
                 do (incf newlines)
                 when (> newlines 1)
                 do (return nil)
-                until (looking-at scan "-*-")
-                do (forward-object scan)
+                until (drei-base:looking-at scan "-*-")
+                do (drei-buffer:forward-object scan)
                 finally (return t))))
         (when start-found
-          (let* ((end-scan (clone-mark scan))
+          (let* ((end-scan (drei-buffer:clone-mark scan))
                  (end-found
-                  (loop when (end-of-buffer-p end-scan)
+                  (loop when (drei-buffer:end-of-buffer-p end-scan)
                      do (return nil)
-                     when (eql (object-after end-scan) #\Newline)
+                     when (eql (drei-buffer:object-after end-scan) #\Newline)
                      do (return nil)
-                     do (forward-object end-scan)
-                     until (looking-at end-scan "-*-")
+                     do (drei-buffer:forward-object end-scan)
+                     until (drei-base:looking-at end-scan "-*-")
                      finally (return t))))
             (when end-found
               (values scan
-                      (progn (forward-object end-scan 3)
+                      (progn (drei-buffer:forward-object end-scan 3)
                              end-scan)))))))))
 
 (defun get-attribute-line (buffer)
   (multiple-value-bind (start-mark end-mark)
       (find-attribute-line-position buffer)
    (when (and start-mark end-mark)
-     (let ((line (buffer-substring buffer
-                                   (offset start-mark)
-                                   (offset end-mark))))
+     (let ((line (drei-buffer:buffer-substring buffer
+                                   (drei-buffer:offset start-mark)
+                                   (drei-buffer:offset end-mark))))
        (when (>= (length line) 6)
          (let ((end (search "-*-" line :from-end t :start2 3)))
            (when end
@@ -251,32 +251,32 @@ their values."
                                           new-attribute-line
                                           "-*-")))
    (multiple-value-bind (start-mark end-mark)
-       (find-attribute-line-position (buffer view))
+       (find-attribute-line-position (esa-io:buffer view))
      (cond ((not (null end-mark))
             ;; We have an existing attribute line.
-            (delete-region start-mark end-mark)
-            (let ((new-line-start (clone-mark start-mark :left)))
-              (insert-sequence start-mark full-attribute-line)
-              (comment-region (syntax view)
+            (drei-buffer:delete-region start-mark end-mark)
+            (let ((new-line-start (drei-buffer:clone-mark start-mark :left)))
+              (drei-buffer:insert-sequence start-mark full-attribute-line)
+              (drei-syntax:comment-region (drei-syntax:syntax view)
                               new-line-start
                               start-mark)))
            (t
             ;; Create a new attribute line at beginning of buffer.
-            (let* ((mark1 (make-buffer-mark (buffer view) 0 :left))
-                   (mark2 (clone-mark mark1 :right)))
-              (insert-sequence mark2 full-attribute-line)
-              (insert-object mark2 #\Newline)
-              (comment-region (syntax view)
+            (let* ((mark1 (drei-buffer:make-buffer-mark (esa-io:buffer view) 0 :left))
+                   (mark2 (drei-buffer:clone-mark mark1 :right)))
+              (drei-buffer:insert-sequence mark2 full-attribute-line)
+              (drei-buffer:insert-object mark2 #\Newline)
+              (drei-syntax:comment-region (drei-syntax:syntax view)
                               mark1
                               mark2)))))))
 
 (defun update-attribute-line (view)
   (replace-attribute-line
-   view (make-attribute-line (syntax view))))
+   view (drei-syntax:make-attribute-line (drei-syntax:syntax view))))
 
 (defun evaluate-attribute-line (view)
   (evaluate-attributes
-   view (split-attribute-line (get-attribute-line (buffer view)))))
+   view (split-attribute-line (get-attribute-line (esa-io:buffer view)))))
 
 ;; Adapted from cl-fad/PCL
 (defun directory-pathname-p (pathspec)
@@ -300,9 +300,9 @@ their values."
                (truename pathname)
                pathname)))
     (find pathname (remove-if-not #'(lambda (view)
-                                      (typep view 'drei-buffer-view))
-                                  (views *application-frame*))
-     :key #'(lambda (view) (filepath (buffer view)))
+                                      (typep view 'drei:drei-buffer-view))
+                                  (drei-core:views clim:*application-frame*))
+     :key #'(lambda (view) (filepath (esa-io:buffer view)))
      :test #'(lambda (fp1 fp2)
                (and fp1 fp2
                     (equal (usable-pathname fp1)
@@ -313,56 +313,56 @@ their values."
 file if necessary."
   (when (and (findablep pathname)
              (not (find-buffer-with-pathname pathname)))
-    (find-file pathname)))
+    (esa-io:find-file pathname)))
 
 (defun find-file-impl (filepath &optional readonlyp)
   (cond ((null filepath)
-         (display-message "No file name given.")
-         (beep))
+         (esa:display-message "No file name given.")
+         (clim:beep))
         ((directory-pathname-p filepath)
-         (display-message "~A is a directory name." filepath)
-         (beep))
+         (esa:display-message "~A is a directory name." filepath)
+         (clim:beep))
         (t
          (let ((existing-view (find-view-with-pathname filepath)))
            (if (and existing-view
-                    (if readonlyp (read-only-p (buffer existing-view)) t))
-               (switch-to-view (current-window) existing-view)
+                    (if readonlyp (esa-buffer:read-only-p (esa-io:buffer existing-view)) t))
+               (switch-to-view (esa:current-window) existing-view)
                (let* ((newp (not (probe-file filepath)))
                       (buffer (if (and newp (not readonlyp))
-                                  (make-new-buffer)
+                                  (esa-buffer:make-new-buffer)
                                   (with-open-file
                                       (stream filepath :direction :input)
-                                    (make-buffer-from-stream stream))))
-                      (view (make-new-view-for-climacs
-                             *esa-instance* 'textual-drei-syntax-view
+                                    (esa-buffer:make-buffer-from-stream stream))))
+                      (view (climacs1-gui:make-new-view-for-climacs
+                             esa:*esa-instance* 'drei:textual-drei-syntax-view
                              :name (filepath-filename filepath)
                              :buffer buffer)))
-                 (unless (buffer-pane-p (current-window))
-                   (other-window (or (find-if #'(lambda (window)
-                                                  (typep window 'climacs-pane))
-                                              (windows *esa-instance*))
-                                     (split-window t))))
-                 (setf (offset (point buffer))
-                       (offset (point view)))
-                 (setf (syntax view)
-                       (make-syntax-for-view
+                 (unless (climacs1-gui:buffer-pane-p (esa:current-window))
+                   (climacs1-gui:other-window (or (find-if #'(lambda (window)
+                                                  (typep window 'climacs1-gui:climacs-pane))
+                                              (esa:windows esa:*esa-instance*))
+                                     (climacs1-gui:split-window t))))
+                 (setf (drei-buffer:offset (drei:point buffer))
+                       (drei-buffer:offset (drei:point view)))
+                 (setf (drei-syntax:syntax view)
+                       (drei:make-syntax-for-view
                         view
                         (syntax-class-name-for-filepath filepath)))
-                 (setf (file-write-time buffer)
+                 (setf (esa-buffer:file-write-time buffer)
                        (if newp (get-universal-time) (file-write-date filepath)))
-                 (setf (needs-saving buffer) nil)
-                 (setf (name buffer) (filepath-filename filepath))
-                 (setf (current-view (current-window)) view)
+                 (setf (esa-buffer:needs-saving buffer) nil)
+                 (setf (esa-utils:name buffer) (filepath-filename filepath))
+                 (setf (drei:current-view (esa:current-window)) view)
                  (evaluate-attribute-line view)
                  (setf (filepath buffer) (pathname filepath)
-                       (read-only-p buffer) readonlyp)
-                 (beginning-of-buffer (point view))
+                       (esa-buffer:read-only-p buffer) readonlyp)
+                 (drei-buffer:beginning-of-buffer (drei:point view))
                  buffer))))))
 
-(defmethod frame-find-file ((application-frame climacs) filepath)
+(defmethod esa-io:frame-find-file ((application-frame climacs1-gui:climacs) filepath)
   (find-file-impl filepath nil))
 
-(defmethod frame-find-file-read-only ((application-frame climacs) filepath)
+(defmethod esa-io:frame-find-file-read-only ((application-frame climacs1-gui:climacs) filepath)
   (find-file-impl filepath t))
 
 (defun directory-of-buffer (buffer)
@@ -372,53 +372,53 @@ directory will be returned."
   (make-pathname
    :directory
    (pathname-directory
-    (or (filepath buffer)
+    (or (esa-buffer:filepath buffer)
         (user-homedir-pathname)))))
 
 (defmethod frame-set-visited-filename
-    ((application-frame climacs) filepath buffer)
-  (setf (filepath buffer) (pathname filepath)
-        (file-saved-p buffer) nil
-        (file-write-time buffer) nil
-        (name buffer) (filepath-filename filepath)
-        (needs-saving buffer) t))
+    ((application-frame climacs1-gui:climacs) filepath buffer)
+  (setf (esa-buffer:filepath buffer) (pathname filepath)
+        (esa-buffer:file-saved-p buffer) nil
+        (esa-buffer:file-write-time buffer) nil
+        (esa-utils:name buffer) (filepath-filename filepath)
+        (esa-buffer:needs-saving buffer) t))
 
 (defun check-file-times (buffer filepath question answer)
   "Return NIL if filepath newer than buffer and user doesn't want
 to overwrite."
   (let ((f-w-d (file-write-date filepath))
-        (f-w-t (file-write-time buffer)))
+        (f-w-t (esa-buffer:file-write-time buffer)))
     (if (and f-w-d f-w-t (> f-w-d f-w-t))
-        (if (accept
+        (if (clim:accept
              'boolean
              :prompt (format nil "File has changed on disk. ~a anyway?"
                              question))
             t
-            (progn (display-message "~a not ~a" filepath answer)
+            (progn (esa:display-message "~a not ~a" filepath answer)
                    nil))
         t)))
 
-(defmethod frame-exit :around ((frame climacs) #-mcclim &key)
-  (dolist (view (views frame))
+(defmethod clim:frame-exit :around ((frame climacs1-gui:climacs) #-mcclim &key)
+  (dolist (view (drei-core:views frame))
     (handler-case
         (when (and (buffer-of-view-needs-saving view)
                    (handler-case
-                       (accept
+                       (clim:accept
                         'boolean
                         :prompt (format nil "Save buffer of view: ~a ?"
-                                        (name view)))
-                     (error () (progn (beep)
-                                      (display-message "Invalid answer")
-                                      (return-from frame-exit nil)))))
-          (save-buffer (buffer view)))
+                                        (esa-utils:name view)))
+                     (error () (progn (clim:beep)
+                                      (esa:display-message "Invalid answer")
+                                      (return-from clim:frame-exit nil)))))
+          (esa-io:save-buffer (esa-io:buffer view)))
       (file-error (e)
-        (display-message "~A (hit a key to continue)" e)
-        (read-gesture))))
-  (when (or (notany #'buffer-of-view-needs-saving (views frame))
-            (handler-case (accept
+        (esa:display-message "~A (hit a key to continue)" e)
+        (clim:read-gesture))))
+  (when (or (notany #'buffer-of-view-needs-saving (drei-core:views frame))
+            (handler-case (clim:accept
                            'boolean
                            :prompt "Modified buffers of views exist.  Quit anyway?")
-              (error () (progn (beep)
-                               (display-message "Invalid answer")
-                               (return-from frame-exit nil)))))
+              (error () (progn (clim:beep)
+                               (esa:display-message "Invalid answer")
+                               (return-from clim:frame-exit nil)))))
     (call-next-method)))
