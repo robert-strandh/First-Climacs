@@ -105,7 +105,9 @@ it will be replaced by some other view."))
     (when (and (buffer-of-view-needs-saving view)
                (= (length (views-having-buffer *esa-instance* (buffer view)))
                   1)
-               (handler-case (accept 'boolean :prompt "Save buffer first?")
+               (handler-case (accept
+                              'boolean
+                              :prompt "Save buffer first?")
                  (error () (progn (beep)
                                   (display-message "Invalid answer")
                                   (return-from kill-view nil)))))
@@ -322,12 +324,14 @@ file if necessary."
 	 (beep))
         (t
          (let ((existing-view (find-view-with-pathname filepath)))
-           (if (and existing-view (if readonlyp (read-only-p (buffer existing-view)) t))
+           (if (and existing-view
+                    (if readonlyp (read-only-p (buffer existing-view)) t))
                (switch-to-view (current-window) existing-view)
                (let* ((newp (not (probe-file filepath)))
                       (buffer (if (and newp (not readonlyp))
                                   (make-new-buffer)
-                                  (with-open-file (stream filepath :direction :input)
+                                  (with-open-file
+                                      (stream filepath :direction :input)
                                     (make-buffer-from-stream stream))))
                       (view (make-new-view-for-climacs
                              *esa-instance* 'textual-drei-syntax-view
@@ -338,11 +342,16 @@ file if necessary."
                                                   (typep window 'climacs-pane))
                                               (windows *esa-instance*))
                                      (split-window t))))
-                 (setf (offset (point buffer)) (offset (point view))
-                       (syntax view) (make-syntax-for-view view (syntax-class-name-for-filepath filepath))
-                       (file-write-time buffer) (if newp (get-universal-time) (file-write-date filepath))
-                       (needs-saving buffer) nil
-                       (name buffer) (filepath-filename filepath))
+                 (setf (offset (point buffer))
+                       (offset (point view)))
+                 (setf (syntax view)
+                       (make-syntax-for-view
+                        view
+                        (syntax-class-name-for-filepath filepath)))
+                 (setf (file-write-time buffer)
+                       (if newp (get-universal-time) (file-write-date filepath)))
+                 (setf (needs-saving buffer) nil)
+                 (setf (name buffer) (filepath-filename filepath))
                  (setf (current-view (current-window)) view)
                  (evaluate-attribute-line view)
                  (setf (filepath buffer) (pathname filepath)
@@ -366,7 +375,8 @@ directory will be returned."
     (or (filepath buffer)
 	(user-homedir-pathname)))))
 
-(defmethod frame-set-visited-filename ((application-frame climacs) filepath buffer)
+(defmethod frame-set-visited-filename
+    ((application-frame climacs) filepath buffer)
   (setf (filepath buffer) (pathname filepath)
 	(file-saved-p buffer) nil
 	(file-write-time buffer) nil
@@ -379,9 +389,10 @@ to overwrite."
   (let ((f-w-d (file-write-date filepath))
 	(f-w-t (file-write-time buffer)))
     (if (and f-w-d f-w-t (> f-w-d f-w-t))
-	(if (accept 'boolean
-		    :prompt (format nil "File has changed on disk. ~a anyway?"
-				    question))
+	(if (accept
+             'boolean
+             :prompt (format nil "File has changed on disk. ~a anyway?"
+                             question))
 	    t
 	    (progn (display-message "~a not ~a" filepath answer)
 		   nil))
@@ -391,8 +402,11 @@ to overwrite."
   (dolist (view (views frame))
     (handler-case
         (when (and (buffer-of-view-needs-saving view)
-                   (handler-case (accept 'boolean
-                                  :prompt (format nil "Save buffer of view: ~a ?" (name view)))
+                   (handler-case
+                       (accept
+                        'boolean
+                        :prompt (format nil "Save buffer of view: ~a ?"
+                                        (name view)))
                      (error () (progn (beep)
                                       (display-message "Invalid answer")
                                       (return-from frame-exit nil)))))
@@ -401,7 +415,9 @@ to overwrite."
         (display-message "~A (hit a key to continue)" e)
         (read-gesture))))
   (when (or (notany #'buffer-of-view-needs-saving (views frame))
-	    (handler-case (accept 'boolean :prompt "Modified buffers of views exist.  Quit anyway?")
+	    (handler-case (accept
+                           'boolean
+                           :prompt "Modified buffers of views exist.  Quit anyway?")
 	      (error () (progn (beep)
 			       (display-message "Invalid answer")
 			       (return-from frame-exit nil)))))
