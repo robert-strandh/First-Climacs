@@ -130,7 +130,7 @@
                           (setf (offset m) offset)
                           (insert* sentence-endings pos-sentence-endings m))
                         (incf pos-sentence-endings))
-                       
+
                        ((and (>= offset 0)
                              (not (member current-object '(#\. #\? #\! #\Newline #\Space #\Tab)))
                              (or (= offset 0)
@@ -142,9 +142,9 @@
                           (insert* sentence-beginnings pos-sentence-beginnings m))
                         (incf pos-sentence-beginnings))
                        (t nil))
-                 
+
                  ;; Paragraphs
-                 
+
                  (cond ((and (< offset buffer-size) ;; Ends
                              (not (eql current-object #\Newline))
                              (or (zerop offset)
@@ -155,7 +155,7 @@
                           (setf (offset m) offset)
                           (insert* paragraphs pos1 m))
                         (incf pos1))
-                       
+
                        ((and (plusp offset) ;;Beginnings
                              (not (eql prev-object #\Newline))
                              (or (= offset buffer-size)
