@@ -269,7 +269,7 @@ their values."
                                            start-mark)))
             (t
              ;; Create a new attribute line at beginning of buffer.
-             (let* ((buffef (esa-io:buffer view))
+             (let* ((buffer (esa-io:buffer view))
                     (mark1 (drei-buffer:make-buffer-mark buffer 0 :left))
                     (mark2 (drei-buffer:clone-mark mark1 :right)))
                (drei-buffer:insert-sequence mark2 full-attribute-line)
