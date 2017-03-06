@@ -59,16 +59,21 @@
   (loop with low-position = 0
         with high-position = (flexichain:nb-elements flexichain)
         for middle-position = (floor (+ low-position high-position) 2)
+        for element = (flexichain:element* flexichain middle-position)
         until (= low-position high-position)
-        do (if (drei-buffer:mark>= (flexichain:element* flexichain middle-position) offset)
+        do (if (drei-buffer:mark>= element offset)
                (setf high-position middle-position)
                (setf low-position (floor (+ low-position 1 high-position) 2)))
         finally (return low-position)))
 
-(drei-syntax:define-syntax text-syntax (drei-fundamental-syntax:fundamental-syntax)
-  ((paragraphs :initform (make-instance 'flexichain:standard-flexichain))
-   (sentence-beginnings :initform (make-instance 'flexichain:standard-flexichain))
-   (sentence-endings :initform (make-instance 'flexichain:standard-flexichain)))
+(drei-syntax:define-syntax text-syntax
+    (drei-fundamental-syntax:fundamental-syntax)
+  ((paragraphs
+    :initform (make-instance 'flexichain:standard-flexichain))
+   (sentence-beginnings
+    :initform (make-instance 'flexichain:standard-flexichain))
+   (sentence-endings
+    :initform (make-instance 'flexichain:standard-flexichain)))
   (:name "Text")
   (:pathname-types "text" "txt" "README"))
 
@@ -81,16 +86,22 @@
          (high-offset (min (+ high-mark-offset 3) (drei-buffer:size buffer)))
          (low-offset (max (- low-mark-offset 3) 0)))
     (with-slots (paragraphs sentence-beginnings sentence-endings) syntax
-      (let ((pos1 (index-of-mark-after-offset paragraphs low-offset))
-            (pos-sentence-beginnings (index-of-mark-after-offset sentence-beginnings low-offset))
-            (pos-sentence-endings (index-of-mark-after-offset sentence-endings low-offset)))
+      (let ((pos1
+              (index-of-mark-after-offset paragraphs low-offset))
+            (pos-sentence-beginnings
+              (index-of-mark-after-offset sentence-beginnings low-offset))
+            (pos-sentence-endings
+              (index-of-mark-after-offset sentence-endings low-offset)))
         ;; start by deleting all syntax marks that are between the low and
         ;; the high marks
         (loop repeat (- (flexichain:nb-elements paragraphs) pos1)
-              while (drei-buffer:mark<= (flexichain:element* paragraphs pos1) high-offset)
+              while (drei-buffer:mark<= (flexichain:element* paragraphs pos1)
+                                        high-offset)
               do (flexichain:delete* paragraphs pos1))
-        (loop repeat (- (flexichain:nb-elements sentence-beginnings) pos-sentence-beginnings)
-              while (drei-buffer:mark<= (flexichain:element* sentence-beginnings pos-sentence-beginnings) high-offset)
+        (loop repeat (- (flexichain:nb-elements sentence-beginnings)
+                        pos-sentence-beginnings)
+              while (drei-buffer:mark<=
+                     (flexichain:element* sentence-beginnings pos-sentence-beginnings) high-offset)
               do (flexichain:delete* sentence-beginnings pos-sentence-beginnings))
         (loop repeat (- (flexichain:nb-elements sentence-endings) pos-sentence-endings)
               while (drei-buffer:mark<= (flexichain:element* sentence-endings pos-sentence-endings) high-offset)
@@ -193,25 +204,25 @@
                    (drei-buffer:offset (flexichain:element* paragraphs pos1))))
          t))))
 
- (defmethod backward-one-sentence ((mark drei-buffer:mark) (syntax text-syntax))
-   (with-slots (sentence-beginnings) syntax
-      (let ((pos1 (index-of-mark-after-offset sentence-beginnings (drei-buffer:offset mark))))
-        (when (> pos1 0)
-          (setf (drei-buffer:offset mark)
-                (drei-buffer:offset (flexichain:element* sentence-beginnings (1- pos1))))
-          t))))
+(defmethod backward-one-sentence ((mark drei-buffer:mark) (syntax text-syntax))
+  (with-slots (sentence-beginnings) syntax
+    (let ((pos1 (index-of-mark-after-offset sentence-beginnings (drei-buffer:offset mark))))
+      (when (> pos1 0)
+        (setf (drei-buffer:offset mark)
+              (drei-buffer:offset (flexichain:element* sentence-beginnings (1- pos1))))
+        t))))
 
- (defmethod forward-one-sentence ((mark drei-buffer:mark) (syntax text-syntax))
-   (with-slots (sentence-endings) syntax
-     (let ((pos1 (index-of-mark-after-offset
-                  sentence-endings
-                  ;; if mark is at sentence-end, jump to end of next
-                  ;; sentence
-                  (1+ (drei-buffer:offset mark)))))
-       (when (< pos1 (flexichain:nb-elements sentence-endings))
-         (setf (drei-buffer:offset mark)
-               (drei-buffer:offset (flexichain:element* sentence-endings pos1)))
-         t))))
+(defmethod forward-one-sentence ((mark drei-buffer:mark) (syntax text-syntax))
+  (with-slots (sentence-endings) syntax
+    (let ((pos1 (index-of-mark-after-offset
+                 sentence-endings
+                 ;; if mark is at sentence-end, jump to end of next
+                 ;; sentence
+                 (1+ (drei-buffer:offset mark)))))
+      (when (< pos1 (flexichain:nb-elements sentence-endings))
+        (setf (drei-buffer:offset mark)
+              (drei-buffer:offset (flexichain:element* sentence-endings pos1)))
+        t))))
 
 (defmethod drei-syntax:syntax-line-indentation ((mark drei-buffer:mark) tab-width (syntax text-syntax))
   (loop with indentation = 0
