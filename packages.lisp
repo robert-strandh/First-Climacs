@@ -159,9 +159,7 @@
   command-defining facilities."))
 
 (defpackage #:climacs-text-syntax
-  (:use :clim-lisp :clim :drei-buffer :drei-base
-	:drei-syntax :flexichain :drei :drei-fundamental-syntax
-        :esa-utils))
+  (:use :clim-lisp))
 
 (defpackage #:climacs-structedit
   (:use :common-lisp)
