@@ -225,7 +225,7 @@ Each newline and following whitespace is replaced by a single space."
 
 (defmethod goto-location ((location view-location))
   (let ((view (find (view-name location)
-                    (climacs1-gui:views *esa-instance*)
+                    (drei::views *esa-instance*)
                     :test #'string= :key #'name)))
     (unless view
       (esa:display-message "No view ~A" (view-name location))
