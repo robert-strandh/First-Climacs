@@ -182,12 +182,16 @@
 
 (defmethod backward-one-paragraph (mark (syntax text-syntax))
   (with-slots (paragraphs) syntax
-     (let ((pos1 (index-of-mark-after-offset paragraphs (drei-buffer:offset mark))))
+     (let* ((offset (drei-buffer:offset mark))
+            (pos1 (index-of-mark-after-offset paragraphs offset)))
        (when (> pos1 0)
          (setf (drei-buffer:offset mark)
-               (if (typep (flexichain:element* paragraphs (1- pos1)) 'drei-buffer:right-sticky-mark)
-                   (drei-buffer:offset (flexichain:element* paragraphs (- pos1 2)))
-                   (drei-buffer:offset (flexichain:element* paragraphs (1- pos1)))))
+               (if (typep (flexichain:element* paragraphs (1- pos1))
+                          'drei-buffer:right-sticky-mark)
+                   (drei-buffer:offset (flexichain:element* paragraphs
+                                                            (- pos1 2)))
+                   (drei-buffer:offset (flexichain:element* paragraphs
+                                                            (1- pos1)))))
          t))))
 
 (defmethod forward-one-paragraph ((mark drei-buffer:mark) (syntax text-syntax))
@@ -199,18 +203,23 @@
                  (1+ (drei-buffer:offset mark)))))
       (when (< pos1 (flexichain:nb-elements paragraphs))
          (setf (drei-buffer:offset mark)
-               (if (typep (flexichain:element* paragraphs pos1) 'drei-buffer:left-sticky-mark)
-                   (drei-buffer:offset (flexichain:element* paragraphs (1+ pos1)))
-                   (drei-buffer:offset (flexichain:element* paragraphs pos1))))
+               (if (typep (flexichain:element* paragraphs pos1)
+                          'drei-buffer:left-sticky-mark)
+                   (drei-buffer:offset (flexichain:element* paragraphs
+                                                            (1+ pos1)))
+                   (drei-buffer:offset (flexichain:element* paragraphs
+                                                            pos1))))
          t))))
 
 (defmethod backward-one-sentence ((mark drei-buffer:mark) (syntax text-syntax))
   (with-slots (sentence-beginnings) syntax
-    (let ((pos1 (index-of-mark-after-offset sentence-beginnings (drei-buffer:offset mark))))
+    (let* ((offset (drei-buffer:offset mark))
+           (pos1 (index-of-mark-after-offset sentence-beginnings offset)))
       (when (> pos1 0)
-        (setf (drei-buffer:offset mark)
-              (drei-buffer:offset (flexichain:element* sentence-beginnings (1- pos1))))
-        t))))
+        (let ((new-mark (flexichain:element* sentence-beginnings (1- pos1))))
+          (setf (drei-buffer:offset mark)
+                (drei-buffer:offset new-mark))
+          t)))))
 
 (defmethod forward-one-sentence ((mark drei-buffer:mark) (syntax text-syntax))
   (with-slots (sentence-endings) syntax
@@ -224,7 +233,8 @@
               (drei-buffer:offset (flexichain:element* sentence-endings pos1)))
         t))))
 
-(defmethod drei-syntax:syntax-line-indentation ((mark drei-buffer:mark) tab-width (syntax text-syntax))
+(defmethod drei-syntax:syntax-line-indentation
+    ((mark drei-buffer:mark) tab-width (syntax text-syntax))
   (loop with indentation = 0
         with mark2 = (drei-buffer:clone-mark mark)
         until (drei-buffer:beginning-of-buffer-p mark2)
