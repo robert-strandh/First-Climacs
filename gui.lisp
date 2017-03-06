@@ -135,7 +135,7 @@
                    view)
                  (remove-other-use ()
                    :report "Make the other window try to display some other view"
-                   (setf (view window-displaying-view)
+                   (setf (drei::view window-displaying-view)
                          (any-preferably-undisplayed-view))
                    (setf (drei::view pane) view))
                  (remove-other-pane ()
@@ -376,28 +376,28 @@ active."
 (defmethod (setf drei-core:views) :after ((new-value null) (frame climacs))
   ;; You think you can remove all views? I laught at your silly
   ;; attempt!
-  (setf (views frame)
+  (setf (drei-core:views frame)
         (list (make-new-view-for-climacs
-               frame 'textual-drei-syntax-view))))
+               frame 'drei:textual-drei-syntax-view))))
 
-(defmethod command-for-unbound-gestures ((frame climacs) gestures)
-  (command-for-unbound-gestures (esa-current-window frame) gestures))
+(defmethod esa:command-for-unbound-gestures ((frame climacs) gestures)
+  (esa:command-for-unbound-gestures (esa:esa-current-window frame) gestures))
 
 (defun make-view-subscript-generator (climacs)
   #'(lambda (name)
-      (1+ (reduce #'max (remove name (views climacs)
-                         :test-not #'string= :key #'name)
+      (1+ (reduce #'max (remove name (drei-core:views climacs)
+                         :test-not #'string= :key #'esa-utils:name)
            :initial-value 0
-           :key #'subscript))))
+           :key #'esa-utils:subscript))))
 
 (defun clone-view-for-climacs (climacs view &rest initargs)
   "Clone `view' and add it to `climacs's list of views."
-  (let ((new-view (apply #'clone-view view
+  (let ((new-view (apply #'drei:clone-view view
                    :subscript-generator (make-view-subscript-generator climacs)
                    :active nil initargs)))
-    (setf (syntax new-view)
-          (make-syntax-for-view new-view (class-of (syntax view))))
-    (push new-view (views climacs))
+    (setf (drei-syntax:syntax new-view)
+          (drei:make-syntax-for-view new-view (class-of (drei-syntax:syntax view))))
+    (push new-view (drei-core:views climacs))
     new-view))
 
 (defun make-new-view-for-climacs (climacs view-class &rest initargs)
@@ -406,31 +406,31 @@ active."
   (let ((new-view (apply #'make-instance view-class
                    :subscript-generator (make-view-subscript-generator climacs)
                    initargs)))
-    (push new-view (views climacs))
+    (push new-view (drei-core:views climacs))
     new-view))
 
 (defun any-view ()
   "Return some view, any view."
-  (first (views *esa-instance*)))
+  (first (drei-core:views esa:*esa-instance*)))
 
 (defun any-displayed-view ()
   "Return some view on display."
-  (view (esa-current-window *application-frame*)))
+  (drei::view (esa:esa-current-window clim:*application-frame*)))
 
 (defun view-on-display (climacs view)
   #.(format nil "Return true if VIEW is on display in a~@
                  window of CLIMACS, false otherwise.")
   (member view (remove-if-not #'(lambda (window)
                                   (typep window 'climacs-pane))
-                              (windows climacs))
-   :key #'view))
+                              (esa:windows climacs))
+   :key #'drei::view))
 
 (defun any-preferably-undisplayed-view ()
   #.(format nil "Return some view, any view, preferable one~@
                  that is not currently displayed in any window.")
   (or (find-if-not #'(lambda (view)
-                       (view-on-display *esa-instance* view))
-                   (views *esa-instance*))
+                       (view-on-display esa:*esa-instance* view))
+                   (drei-core:views esa:*esa-instance*))
       (any-view)))
 
 (defun any-undisplayed-view ()
@@ -438,16 +438,16 @@ active."
                  it is not currently displayed in any window.~@
                  If necessary, clone a view on display.")
   (or (find-if-not #'(lambda (view)
-                       (view-on-display *esa-instance* view))
-                   (views *esa-instance*))
-      (clone-view-for-climacs *esa-instance* (any-view))))
+                       (view-on-display esa:*esa-instance* view))
+                   (drei-core:views esa:*esa-instance*))
+      (clone-view-for-climacs esa:*esa-instance* (any-view))))
 
-(define-presentation-type read-only ())
-(define-presentation-method highlight-presentation 
+(clim:define-presentation-type read-only ())
+(clim:define-presentation-method clim:highlight-presentation 
     ((type read-only) record stream state)
   nil)
-(define-presentation-type modified ())
-(define-presentation-method highlight-presentation 
+(clim:define-presentation-type modified ())
+(clim:define-presentation-method clim:highlight-presentation 
     ((type modified) record stream state)
   nil)
 
@@ -465,41 +465,41 @@ active."
 
 (defmethod display-view-info-to-info-pane ((info-pane climacs-info-pane)
                                            (master-pane climacs-pane)
-                                           (view drei-syntax-view))
-  (with-text-family (info-pane :sans-serif)
-    (display-syntax-name (syntax view) info-pane :view view)))
+                                           (view drei:drei-syntax-view))
+  (clim:with-text-family (info-pane :sans-serif)
+    (drei-syntax:display-syntax-name (drei-syntax:syntax view) info-pane :view view)))
 
 (defmethod display-view-info-to-info-pane ((info-pane climacs-info-pane)
                                            (master-pane climacs-pane)
-                                           (view textual-drei-syntax-view))
-  (let ((point (point view))
-        (bot (bot view))
-        (top (top view))
-        (size (size (buffer view))))
+                                           (view drei:textual-drei-syntax-view))
+  (let ((point (clim:point view))
+        (bot (drei:bot view))
+        (top (drei:top view))
+        (size (drei-buffer:size (esa-io:buffer view))))
     (format info-pane "  ~A  "
-            (cond ((and (mark= size bot)
-                        (mark= 0 top))
+            (cond ((and (drei-buffer:mark= size bot)
+                        (drei-buffer:mark= 0 top))
                    "")
-                  ((mark= size bot)
+                  ((drei-buffer:mark= size bot)
                    "Bot")
-                  ((mark= 0 top)
+                  ((drei-buffer:mark= 0 top)
                    "Top")
                   (t (format nil "~a%"
-                             (round (* 100 (/ (offset top)
+                             (round (* 100 (/ (drei-buffer:offset top)
                                               size)))))))
     (when *show-info-pane-mark-position*
       (format info-pane "(~A,~A)     "
-              (1+ (line-number point))
-              (column-number point)))
+              (1+ (drei-buffer:line-number point))
+              (drei-buffer:column-number point)))
     (princ #\( info-pane)
     (call-next-method)
     (format info-pane "~{~:[~*~; ~A~]~}"
             (list
-             (overwrite-mode view)
+             (drei:overwrite-mode view)
              "Ovwrt"
-             (auto-fill-mode view)
+             (drei:auto-fill-mode view)
              "Fill"
-             (isearch-mode master-pane)
+             (drei:isearch-mode master-pane)
              "Isearch"))
     (princ #\) info-pane)))
 
@@ -509,17 +509,17 @@ active."
 
 (defmethod display-view-status-to-info-pane ((info-pane climacs-info-pane)
                                              (master-pane climacs-pane)
-                                             (view drei-syntax-view))
-  (with-output-as-presentation (info-pane view 'read-only)
+                                             (view drei:drei-syntax-view))
+  (clim:with-output-as-presentation (info-pane view 'read-only)
     (princ (cond
-             ((read-only-p (buffer view)) "%")
-             ((needs-saving (buffer view)) "*")
+             ((esa-buffer:read-only-p (esa-io:buffer view)) "%")
+             ((esa-buffer:needs-saving (esa-io:buffer view)) "*")
              (t "-"))
            info-pane))
-  (with-output-as-presentation (info-pane view 'modified)
+  (clim:with-output-as-presentation (info-pane view 'modified)
     (princ (cond
-             ((needs-saving (buffer view)) "*")
-             ((read-only-p (buffer view)) "%")
+             ((esa-buffer:needs-saving (esa-io:buffer view)) "*")
+             ((esa-buffer:read-only-p (esa-io:buffer view)) "%")
              (t "-"))
            info-pane))
   (princ "  " info-pane))
@@ -529,39 +529,39 @@ active."
                                              (view typeout-view)))
 
 (defun display-info (frame pane)
-  (let* ((master-pane (master-pane pane))
-         (view (view master-pane)))
+  (let* ((master-pane (esa:master-pane pane))
+         (view (drei::view master-pane)))
     (princ "   " pane)
     (display-view-status-to-info-pane pane master-pane view)
-    (with-text-face (pane :bold)
-      (with-output-as-presentation (pane view 'view)
-        (format pane "~A" (subscripted-name view)))
+    (clim:with-text-face (pane :bold)
+      (clim:with-output-as-presentation (pane view 'clim:view)
+        (format pane "~A" (esa-utils:subscripted-name view)))
       ;; FIXME: bare 25.
-      (format pane "~V@T" (max (- 25 (length (subscripted-name view))) 1)))
+      (format pane "~V@T" (max (- 25 (length (esa-utils:subscripted-name view))) 1)))
     (display-view-info-to-info-pane pane master-pane view)
-    (with-text-family (pane :sans-serif)
-      (princ (if (recordingp frame)
+    (clim:with-text-family (pane :sans-serif)
+      (princ (if (esa:recordingp frame)
                  "Def"
                  "")
              pane))))
 
-(defmethod handle-drei-condition ((drei climacs-pane) condition)
+(defmethod drei:handle-drei-condition ((drei climacs-pane) condition)
   (call-next-method)
-  (display-drei drei :redisplay-minibuffer t))
+  (drei:display-drei drei :redisplay-minibuffer t))
 
-(defmethod execute-frame-command :around ((frame climacs) command)
-  (if (eq frame *esa-instance*)
-      (handling-drei-conditions
-        (with-undo ((buffers frame))
+(defmethod clim:execute-frame-command :around ((frame climacs) command)
+  (if (eq frame esa:*esa-instance*)
+      (drei:handling-drei-conditions
+        (drei:with-undo ((esa:buffers frame))
           (call-next-method)))
       (call-next-method)))
 
-(define-command (com-full-redisplay :name t :command-table base-table) ()
+(clim:define-command (com-full-redisplay :name t :command-table base-table) ()
   #.(format nil "Redisplay the contents of the current window.~@
                  FIXME: does this really have that effect?")
-  (full-redisplay (current-window)))
+  (drei:full-redisplay (esa:current-window)))
 
-(set-key 'com-full-redisplay
+(esa:set-key 'com-full-redisplay
          'base-table
          '((#\l :control)))
 
@@ -570,54 +570,54 @@ active."
                  Climacs instance. WINDOW must already be~@
                  recognized by the Climacs instance.")
   ;; Ensure that only one pane can be active.
-  (let ((climacs (pane-frame window)))
+  (let ((climacs (clim:pane-frame window)))
     (unless (current-window-p window)
-      (when (typep (esa-current-window climacs) 'climacs-pane)
-        (setf (active (esa-current-window climacs)) nil))
-      (unless (member window (windows climacs))
+      (when (typep (esa:esa-current-window climacs) 'climacs-pane)
+        (setf (drei:active (esa:esa-current-window climacs)) nil))
+      (unless (member window (esa:windows climacs))
         (error "Cannot set unknown window to be active window"))
-      (setf (windows climacs)
-            (cons window (remove window (windows climacs)))))
+      (setf (esa:windows climacs)
+            (cons window (remove window (esa:windows climacs)))))
     (ensure-only-view-active
      climacs (when (typep window 'climacs-pane)
-               (view window)))))
+               (drei::view window)))))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;
 ;;; Pane functions
 
 (defun replace-constellation (constellation additional-constellation vertical-p)
-  (let* ((parent (sheet-parent constellation))
-         (children (sheet-children parent))
+  (let* ((parent (clim:sheet-parent constellation))
+         (children (clim:sheet-children parent))
          (first (first children))
          (second (second children))
          (third (third children))
-         (first-split-p (= (length (sheet-children parent)) 2))
-         (parent-region (sheet-region parent))
-         (parent-height (rectangle-height parent-region))
-         (parent-width (rectangle-width parent-region))
-         (filler (when first-split-p (make-pane 'basic-pane))) ;Prevents resizing.
+         (first-split-p (= (length (clim:sheet-children parent)) 2))
+         (parent-region (clim:sheet-region parent))
+         (parent-height (clim:rectangle-height parent-region))
+         (parent-width (clim:rectangle-width parent-region))
+         (filler (when first-split-p (clim:make-pane 'clim:basic-pane))) ;Prevents resizing.
          (adjust #+mcclim (make-pane 'clim-extensions:box-adjuster-gadget)))
     (assert (member constellation children))
     
-    (when first-split-p (setf (sheet-region filler) (sheet-region parent)) 
-      (sheet-adopt-child parent filler))
+    (when first-split-p (setf (clim:sheet-region filler) (clim:sheet-region parent)) 
+      (clim:sheet-adopt-child parent filler))
 
-    (sheet-disown-child parent constellation)
+    (clim:sheet-disown-child parent constellation)
 
     (if vertical-p
-        (resize-sheet constellation parent-width (/ parent-height 2))
-        (resize-sheet constellation  (/ parent-width 2) parent-height))
+        (clim:resize-sheet constellation parent-width (/ parent-height 2))
+        (clim:resize-sheet constellation  (/ parent-width 2) parent-height))
     
     (let ((new (if vertical-p
-                   (vertically ()
+                   (clim:vertically ()
                      constellation adjust additional-constellation)
-                   (horizontally ()
+                   (clim:horizontally ()
                      constellation adjust additional-constellation))))
-      (sheet-adopt-child parent new)
+      (clim:sheet-adopt-child parent new)
 
-      (when first-split-p (sheet-disown-child parent filler))
-      (reorder-sheets parent 
+      (when first-split-p (clim:sheet-disown-child parent filler))
+      (clim:reorder-sheets parent 
                       (if (eq constellation first)
                           (if third
                               (list new second third)
@@ -626,9 +626,9 @@ active."
                               (list first second new)
                               (list first new)))))))
 (defun find-parent (sheet)
-  (loop for parent = (sheet-parent sheet)
-          then (sheet-parent parent)
-        until (typep parent 'vrack-pane)
+  (loop for parent = (clim:sheet-parent sheet)
+          then (clim:sheet-parent parent)
+        until (typep parent 'clim:vrack-pane)
         finally (return parent)))
 
 (defun make-pane-constellation (&optional (with-scrollbars *with-scrollbars*))
@@ -638,14 +638,14 @@ active."
                  an extended pane.  Return the vbox and the extended pane~@
                  as two values. If with-scrollbars nil, omit the scroller.")
   (let* ((climacs-pane
-          (make-pane 'climacs-pane :name 'window))
+          (clim:make-pane 'climacs-pane :name 'window))
          (vbox
-          (vertically ()
+          (clim:vertically ()
             (if with-scrollbars
-                (scrolling ()
+                (clim:scrolling ()
                   climacs-pane)
                 climacs-pane)
-            (make-pane 'climacs-info-pane
+            (clim:make-pane 'climacs-info-pane
                        :master-pane climacs-pane))))
     (values vbox climacs-pane)))
 
@@ -659,48 +659,48 @@ active."
 
 (defmethod setup-split-pane
     ((orig-pane climacs-pane) (new-pane climacs-pane) clone-view)
-  (when (buffer-view-p (view orig-pane))
-    (setf (offset (point (buffer (view orig-pane))))
-          (offset (point (view orig-pane)))))
-  (setf (view new-pane)
+  (when (drei:buffer-view-p (drei::view orig-pane))
+    (setf (drei-buffer:offset (drei:point (esa-io:buffer (drei::view orig-pane))))
+          (drei-buffer:offset (drei:point (drei::view orig-pane)))))
+  (setf (drei::view new-pane)
         (if clone-view
-            (clone-view-for-climacs (pane-frame orig-pane) (view orig-pane))
+            (clone-view-for-climacs (clim:pane-frame orig-pane) (drei::view orig-pane))
             (any-preferably-undisplayed-view))))
 
 (defun split-window
-    (&optional (vertically-p nil) (clone-view nil) (pane (current-window)))
-  (with-look-and-feel-realization
-      ((frame-manager *esa-instance*) *esa-instance*)
+    (&optional (vertically-p nil) (clone-view nil) (pane (esa:current-window)))
+  (clim:with-look-and-feel-realization
+      ((clim:frame-manager esa:*esa-instance*) esa:*esa-instance*)
     (multiple-value-bind (vbox new-pane) (make-pane-constellation)
       (let* ((current-window pane)
              (constellation-root (find-parent current-window)))
         (setup-split-pane current-window new-pane clone-view)
-        (push new-pane (rest (windows *esa-instance*)))
+        (push new-pane (rest (esa:windows esa:*esa-instance*)))
         (replace-constellation constellation-root vbox vertically-p)
-        (full-redisplay current-window)
-        (full-redisplay new-pane)
+        (drei:full-redisplay current-window)
+        (drei:full-redisplay new-pane)
         (activate-window pane)
         new-pane))))
 
-(defun delete-window (&optional (window (current-window)))
-  (unless (null (cdr (windows *esa-instance*)))
+(defun delete-window (&optional (window (esa:current-window)))
+  (unless (null (cdr (esa:windows esa:*esa-instance*)))
     (let* ((constellation (find-parent window))
-           (box (sheet-parent constellation))
-           (box-children (sheet-children box))
+           (box (clim:sheet-parent constellation))
+           (box-children (clim:sheet-children box))
            (other (if (eq constellation (first box-children))
                       (third box-children)
                       (first box-children)))
-           (parent (sheet-parent box))
-           (children (sheet-children parent))
+           (parent (clim:sheet-parent box))
+           (children (clim:sheet-children parent))
            (first (first children))
            (second (second children))
            (third (third children)))
-      (setf (windows *esa-instance*)
-            (delete window (windows *esa-instance*)))
-      (sheet-disown-child box other)
-      (sheet-adopt-child parent other)
-      (sheet-disown-child parent box)
-      (reorder-sheets parent (if (eq box first)
+      (setf (esa:windows esa:*esa-instance*)
+            (delete window (esa:windows esa:*esa-instance*)))
+      (clim:sheet-disown-child box other)
+      (clim:sheet-adopt-child parent other)
+      (clim:sheet-disown-child parent box)
+      (clim:reorder-sheets parent (if (eq box first)
                                  (if third
                                      (list other second third)
                                      (list other second))
@@ -709,16 +709,16 @@ active."
                                      (list first other)))))))
 
 (defun other-window (&optional pane)
-  (setf (windows *esa-instance*)
-        (if (and pane (find pane (windows *esa-instance*)))
+  (setf (esa:windows esa:*esa-instance*)
+        (if (and pane (find pane (esa:windows esa:*esa-instance*)))
             (append (list pane)
-                    (remove pane (windows *esa-instance*)))
-            (append (rest (windows *esa-instance*))
-                    (list (esa-current-window *esa-instance*)))))
-  (activate-window (esa-current-window *esa-instance*)))
+                    (remove pane (esa:windows esa:*esa-instance*)))
+            (append (rest (esa:windows esa:*esa-instance*))
+                    (list (esa:esa-current-window esa:*esa-instance*)))))
+  (activate-window (esa:esa-current-window esa:*esa-instance*)))
 
 ;;; For the ESA help functions.
 
-(defmethod invoke-with-help-stream ((frame climacs) title continuation)
+(defmethod esa:invoke-with-help-stream ((frame climacs) title continuation)
   (with-typeout-view (stream title t)
     (funcall continuation stream)))
