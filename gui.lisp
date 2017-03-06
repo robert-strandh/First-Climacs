@@ -597,7 +597,7 @@ active."
          (parent-height (clim:rectangle-height parent-region))
          (parent-width (clim:rectangle-width parent-region))
          (filler (when first-split-p (clim:make-pane 'clim:basic-pane))) ;Prevents resizing.
-         (adjust #+mcclim (make-pane 'clim-extensions:box-adjuster-gadget)))
+         (adjust #+mcclim (clim:make-pane 'clim-extensions:box-adjuster-gadget)))
     (assert (member constellation children))
     
     (when first-split-p (setf (clim:sheet-region filler) (clim:sheet-region parent)) 
